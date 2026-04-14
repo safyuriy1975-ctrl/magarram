@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0d7c8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Türkçe">
+  <meta name="description" content="Тренажёр турецких падежей с гармонией гласных">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/icon-192.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <title>Türkçe Pratik</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="logo">T</div>
+    <div>
+      <div class="app-title">Türkçe Pratik</div>
+      <div class="app-sub">Тренажёр падежей</div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ TRAINER ═══════════════ -->
+  <div id="page-trainer" class="page">
+
+    <!-- Session bar -->
+    <div class="session-bar">
+      <div class="s-stat"><span class="s-num" id="s-total">0</span><span class="s-lbl">вопросов</span></div>
+      <div class="s-stat"><span class="s-num c-ok" id="s-right">0</span><span class="s-lbl">верно</span></div>
+      <div class="s-stat"><span class="s-num" id="s-acc">—</span><span class="s-lbl">точность</span></div>
+      <span id="s-streak" class="streak"></span>
+    </div>
+
+    <!-- Question card -->
+    <div class="question-card" id="question-card">
+      <div class="case-badge-row">
+        <span class="case-badge" id="case-badge">—</span>
+        <span class="case-q" id="case-q"></span>
+      </div>
+
+      <div class="word-display">
+        <span class="word-tr" id="word-tr"></span>
+        <span class="word-ru" id="word-ru"></span>
+        <span class="word-cat" id="word-cat"></span>
+      </div>
+
+      <p class="task-prompt" id="task-prompt"></p>
+
+      <!-- Input phase -->
+      <div class="input-area" id="input-area">
+        <input type="text" id="answer-input" class="answer-input"
+          placeholder="Введите турецкую форму…"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-check">Проверить</button>
+          <button class="btn btn-ghost" id="btn-skip">Пропустить</button>
+        </div>
+      </div>
+
+      <!-- Result phase -->
+      <div class="result-area" id="result-area" style="display:none">
+        <div class="res-top">
+          <span class="res-icon" id="res-icon"></span>
+          <div>
+            <div class="res-verdict" id="res-verdict"></div>
+            <div class="res-your" id="res-your" style="display:none"></div>
+            <div class="res-correct" id="res-correct"></div>
+          </div>
+        </div>
+        <div class="rule-box" id="res-rule"></div>
+        <button class="btn btn-primary btn-full" id="btn-next">Следующее слово →</button>
+      </div>
+    </div>
+
+    <!-- Cheatsheet -->
+    <div class="cheatsheet">
+      <div class="cheat-title">Все формы этого слова</div>
+      <div class="cheatsheet-grid" id="cheatsheet-grid"></div>
+    </div>
+
+  </div><!-- /trainer -->
+
+  <!-- ═══════════════ STATS ═══════════════ -->
+  <div id="page-stats" class="page">
+    <div class="page-title">Прогресс</div>
+
+    <div class="summary-grid">
+      <div class="sum-card"><span class="sum-num" id="st-total">0</span><span class="sum-lbl">Попыток</span></div>
+      <div class="sum-card"><span class="sum-num c-ok" id="st-right">0</span><span class="sum-lbl">Верно</span></div>
+      <div class="sum-card"><span class="sum-num" id="st-acc">0%</span><span class="sum-lbl">Точность</span></div>
+    </div>
+
+    <div>
+      <div class="section-title">По падежам</div>
+      <div class="case-bars" id="case-bars"></div>
+    </div>
+
+    <div>
+      <div class="section-title">Последние попытки</div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+    <button class="btn btn-danger btn-full" id="btn-reset">Сбросить прогресс</button>
+  </div>
+
+  <!-- ═══════════════ REFERENCE ═══════════════ -->
+  <div id="page-ref" class="page">
+    <div class="page-title">Справочник</div>
+
+    <!-- Гармония гласных -->
+    <div>
+      <div class="section-title">Гармония гласных</div>
+      <div class="vowel-grid">
+        <div class="vowel-box" style="border-color:#E74C3C;background:rgba(231,76,60,.1)">
+          <div class="vowel-box-title" style="color:#E74C3C">Задние нескруглённые</div>
+          <div class="vowel-pills">
+            <span class="vpill" style="background:#E74C3C">a</span>
+            <span class="vpill" style="background:#E74C3C">ı</span>
+          </div>
+        </div>
+        <div class="vowel-box" style="border-color:#2980B9;background:rgba(41,128,185,.1)">
+          <div class="vowel-box-title" style="color:#2980B9">Передние нескруглённые</div>
+          <div class="vowel-pills">
+            <span class="vpill" style="background:#2980B9">e</span>
+            <span class="vpill" style="background:#2980B9">i</span>
+          </div>
+        </div>
+        <div class="vowel-box" style="border-color:#27AE60;background:rgba(39,174,96,.1)">
+          <div class="vowel-box-title" style="color:#27AE60">Задние скруглённые</div>
+          <div class="vowel-pills">
+            <span class="vpill" style="background:#27AE60">o</span>
+            <span class="vpill" style="background:#27AE60">u</span>
+          </div>
+        </div>
+        <div class="vowel-box" style="border-color:#8E44AD;background:rgba(142,68,173,.1)">
+          <div class="vowel-box-title" style="color:#8E44AD">Передние скруглённые</div>
+          <div class="vowel-pills">
+            <span class="vpill" style="background:#8E44AD">ö</span>
+            <span class="vpill" style="background:#8E44AD">ü</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Падежи -->
+    <div>
+      <div class="section-title">Падежи</div>
+      <div class="case-cards-ref">
+        <div class="ref-card" style="border-color:#2B5BD7">
+          <div class="ref-card-name" style="color:#2B5BD7">Именительный</div>
+          <div class="ref-card-tr">Yalın</div>
+          <div class="ref-card-suf">—</div>
+          <div class="ref-card-q">Кто? Что?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">kedi → <b>kedi</b></span>
+            <span class="ref-ex">ev → <b>ev</b></span>
+          </div>
+        </div>
+        <div class="ref-card" style="border-color:#7B2FBE">
+          <div class="ref-card-name" style="color:#7B2FBE">Родительный</div>
+          <div class="ref-card-tr">Tamlayan</div>
+          <div class="ref-card-suf">-(n)ın/in/un/ün</div>
+          <div class="ref-card-q">Чего? Кого?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">kedi → <b>kedinin</b></span>
+            <span class="ref-ex">araba → <b>arabanın</b></span>
+          </div>
+        </div>
+        <div class="ref-card" style="border-color:#C0392B">
+          <div class="ref-card-name" style="color:#C0392B">Винительный</div>
+          <div class="ref-card-tr">Belirtme</div>
+          <div class="ref-card-suf">-(y)ı/i/u/ü</div>
+          <div class="ref-card-q">Кого? Что?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">kedi → <b>kediyi</b></span>
+            <span class="ref-ex">kitap → <b>kitabı</b></span>
+          </div>
+        </div>
+        <div class="ref-card" style="border-color:#1E8449">
+          <div class="ref-card-name" style="color:#1E8449">Дательный</div>
+          <div class="ref-card-tr">Yönelme</div>
+          <div class="ref-card-suf">-(y)a/e</div>
+          <div class="ref-card-q">Кому? Куда?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">ev → <b>eve</b></span>
+            <span class="ref-ex">okul → <b>okula</b></span>
+          </div>
+        </div>
+        <div class="ref-card" style="border-color:#B7770D">
+          <div class="ref-card-name" style="color:#B7770D">Местный</div>
+          <div class="ref-card-tr">Bulunma</div>
+          <div class="ref-card-suf">-da/de/ta/te</div>
+          <div class="ref-card-q">Где?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">ev → <b>evde</b></span>
+            <span class="ref-ex">okul → <b>okulda</b></span>
+          </div>
+        </div>
+        <div class="ref-card" style="border-color:#1A7A8A">
+          <div class="ref-card-name" style="color:#1A7A8A">Исходный</div>
+          <div class="ref-card-tr">Uzaklaşma</div>
+          <div class="ref-card-suf">-dan/den/tan/ten</div>
+          <div class="ref-card-q">Откуда?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">ev → <b>evden</b></span>
+            <span class="ref-ex">okul → <b>okuldan</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Таблица -->
+    <div>
+      <div class="section-title">Аффиксы по гласным</div>
+      <table class="harmony-table">
+        <thead>
+          <tr>
+            <th>Гласная</th><th style="color:#7B2FBE">Род.</th>
+            <th style="color:#C0392B">Вин.</th><th style="color:#1E8449">Дат.</th>
+            <th style="color:#B7770D">Мест.</th><th style="color:#1A7A8A">Исх.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="ht-vowel" style="color:#E74C3C">a</td><td>-nın</td><td>-yı</td><td>-ya</td><td>-da</td><td>-dan</td></tr>
+          <tr><td class="ht-vowel" style="color:#E74C3C">ı</td><td>-nın</td><td>-yı</td><td>-ya</td><td>-da</td><td>-dan</td></tr>
+          <tr><td class="ht-vowel" style="color:#2980B9">e</td><td>-nin</td><td>-yi</td><td>-ye</td><td>-de</td><td>-den</td></tr>
+          <tr><td class="ht-vowel" style="color:#2980B9">i</td><td>-nin</td><td>-yi</td><td>-ye</td><td>-de</td><td>-den</td></tr>
+          <tr><td class="ht-vowel" style="color:#27AE60">o</td><td>-nun</td><td>-yu</td><td>-ya</td><td>-da</td><td>-dan</td></tr>
+          <tr><td class="ht-vowel" style="color:#27AE60">u</td><td>-nun</td><td>-yu</td><td>-ya</td><td>-da</td><td>-dan</td></tr>
+          <tr><td class="ht-vowel" style="color:#8E44AD">ö</td><td>-nün</td><td>-yü</td><td>-ye</td><td>-de</td><td>-den</td></tr>
+          <tr><td class="ht-vowel" style="color:#8E44AD">ü</td><td>-nün</td><td>-yü</td><td>-ye</td><td>-de</td><td>-den</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px;color:#5a5a7a;margin-top:6px">* Буфер н/й добавляется если основа на гласную</p>
+    </div>
+
+    <!-- Буферные -->
+    <div>
+      <div class="section-title">Буферные согласные и озвончение</div>
+      <div class="buf-grid">
+        <div class="buf-item">
+          <div class="buf-rule">Основа на гласную + Вин./Дат. → буфер Й</div>
+          <div class="buf-ex">araba → arabay<b>a</b> | kedi → kediy<b>e</b></div>
+        </div>
+        <div class="buf-item">
+          <div class="buf-rule">Основа на гласную + Род. → буфер Н</div>
+          <div class="buf-ex">kedi → kedi<b>n</b>in | araba → araba<b>n</b>ın</div>
+        </div>
+        <div class="buf-item">
+          <div class="buf-rule">Озвончение: ç→c, p→b, t→d</div>
+          <div class="buf-ex">kitap → kita<b>b</b>a | ağaç → ağa<b>c</b>a</div>
+        </div>
+        <div class="buf-item" style="border-left-color:#B7770D">
+          <div class="buf-rule">После глухих (ç,f,h,k,p,s,ş,t) → т вместо д</div>
+          <div class="buf-ex">kitap → kita<b>p</b>ta | sepet → sepe<b>t</b>te</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:8px"></div>
+  </div><!-- /ref -->
+
+  <!-- NAV BAR -->
+  <nav class="nav-bar">
+    <button class="nav-btn active" id="nav-trainer">
+      <span class="nav-icon">✏️</span>Тренажёр
+    </button>
+    <button class="nav-btn" id="nav-stats">
+      <span class="nav-icon">📊</span>Прогресс
+    </button>
+    <button class="nav-btn" id="nav-ref">
+      <span class="nav-icon">📖</span>Справка
+    </button>
+  </nav>
+
+</div><!-- /shell -->
+<script src="app.js"></script>
+</body>
+</html>
