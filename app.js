@@ -357,7 +357,8 @@ function pickQuestion(prev) {
   let word, cas;
   let tries = 0;
   do {
-    word = WORDS[Math.floor(Math.random()*WORDS.length)];
+    const allW = getAllWords();
+    word = allW[Math.floor(Math.random()*allW.length)];
     cas  = cases[Math.floor(Math.random()*cases.length)];
     tries++;
   } while (tries < 20 && prev && word.w === prev.word.w && cas.id === prev.cas.id);
@@ -375,6 +376,7 @@ function render() {
 
   if (state.page === 'trainer') renderTrainer();
   if (state.page === 'stats')   renderStats();
+  if (state.page === 'words')   renderMyWords();
   if (state.page === 'ref')     renderRef();
 }
 
@@ -551,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (q) { state.word = q.word; state.cas = q.cas; }
 
   // Nav
-  ['trainer','stats','ref'].forEach(p =>
+  ['trainer','stats','words','ref'].forEach(p =>
     $('nav-'+p).addEventListener('click', () => goPage(p)));
 
   // Check
@@ -566,6 +568,12 @@ document.addEventListener('DOMContentLoaded', () => {
       else nextQuestion();
     }
   });
+
+  // My Words
+  loadMyWords();
+  $('btn-add-word').addEventListener('click', addMyWord);
+  $('new-word-tr').addEventListener('keydown', e => { if (e.key==='Enter') $('new-word-ru').focus(); });
+  $('new-word-ru').addEventListener('keydown', e => { if (e.key==='Enter') addMyWord(); });
 
   // Reset
   $('btn-reset').addEventListener('click', () => {
@@ -582,5 +590,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // SW
   if ('serviceWorker' in navigator)
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    navigator.serviceWorker.register('/magarram/sw.js').catch(()=>{});
 });
+
+// ─── MY WORDS ──────────────────────────────────────────────────────────────────
+let myWords = [];
+
+function loadMyWords() {
+  try {
+    const saved = JSON.parse(LS.getItem('tc_mywords') || '[]');
+    myWords = saved.filter(w => w.w && w.ru);
+  } catch(e) { myWords = []; }
+}
+
+function saveMyWords() {
+  try { LS.setItem('tc_mywords', JSON.stringify(myWords)); } catch(e){}
+}
+
+function getAllWords() {
+  return WORDS.concat(myWords.map(w => ({...w, cat: 'мои слова'})));
+}
+
+function addMyWord() {
+  const tr = $('new-word-tr').value.trim().toLowerCase();
+  const ru = $('new-word-ru').value.trim();
+  const msg = $('add-word-msg');
+
+  if (!tr) { showMsg(msg, 'Введите турецкое слово', 'err'); return; }
+  if (!ru) { showMsg(msg, 'Введите перевод', 'err'); return; }
+
+  // Проверка — только латиница и турецкие буквы
+  if (!/^[a-zçğıöşüâîû ]+$/.test(tr)) {
+    showMsg(msg, 'Слово должно быть на турецком (латинскими буквами)', 'err'); return;
+  }
+
+  // Дубликат?
+  if (myWords.some(w => w.w === tr) || WORDS.some(w => w.w === tr)) {
+    showMsg(msg, 'Это слово уже есть в базе', 'err'); return;
+  }
+
+  myWords.push({ w: tr, ru });
+  saveMyWords();
+  $('new-word-tr').value = '';
+  $('new-word-ru').value = '';
+  showMsg(msg, '✓ Слово «' + tr + '» добавлено!', 'ok');
+  renderMyWords();
+  setTimeout(() => { msg.textContent = ''; msg.className = 'add-word-msg'; }, 3000);
+}
+
+function showMsg(el, text, type) {
+  el.textContent = text;
+  el.className = 'add-word-msg ' + type;
+}
+
+function deleteMyWord(w) {
+  myWords = myWords.filter(x => x.w !== w);
+  saveMyWords();
+  renderMyWords();
+}
+
+function renderMyWords() {
+  const list = $('my-words-list');
+  if (!myWords.length) {
+    list.innerHTML = '<div class="my-words-empty">Пока нет своих слов.<br>Добавь первое слово выше.</div>';
+    return;
+  }
+  list.innerHTML = myWords.map(w => `
+    <div class="my-word-item">
+      <div>
+        <div class="my-word-tr">${w.w}</div>
+        <div class="my-word-ru">${w.ru}</div>
+      </div>
+      <button class="my-word-del" onclick="deleteMyWord('${w.w}')">удалить</button>
+    </div>
+  `).join('');
+}

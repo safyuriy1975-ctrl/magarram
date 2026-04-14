@@ -272,6 +272,24 @@
     <div style="height:8px"></div>
   </div><!-- /ref -->
 
+  <!-- ═══════════════ MY WORDS ═══════════════ -->
+  <div id="page-words" class="page">
+    <div class="page-title">Мои слова</div>
+
+    <div class="add-word-form">
+      <div class="add-word-row">
+        <input type="text" id="new-word-tr" class="add-input" placeholder="Турецкое слово (напр. araba)"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <input type="text" id="new-word-ru" class="add-input" placeholder="Перевод на русском (напр. машина)"
+          autocomplete="off" spellcheck="false">
+      </div>
+      <button class="btn btn-primary btn-full" id="btn-add-word">Добавить слово</button>
+      <div id="add-word-msg" class="add-word-msg"></div>
+    </div>
+
+    <div id="my-words-list" class="my-words-list"></div>
+  </div>
+
   <!-- NAV BAR -->
   <nav class="nav-bar">
     <button class="nav-btn active" id="nav-trainer">
@@ -279,6 +297,9 @@
     </button>
     <button class="nav-btn" id="nav-stats">
       <span class="nav-icon">📊</span>Прогресс
+    </button>
+    <button class="nav-btn" id="nav-words">
+      <span class="nav-icon">➕</span>Слова
     </button>
     <button class="nav-btn" id="nav-ref">
       <span class="nav-icon">📖</span>Справка
