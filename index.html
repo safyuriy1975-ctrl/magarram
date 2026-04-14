@@ -272,6 +272,58 @@
     <div style="height:8px"></div>
   </div><!-- /ref -->
 
+  <!-- ═══════════════ SENTENCES ═══════════════ -->
+  <div id="page-sent" class="page">
+    <div class="page-title">Предложения</div>
+
+    <!-- Level filter -->
+    <div class="sent-filter">
+      <button class="sent-lvl active" id="sent-lvl-all">Все</button>
+      <button class="sent-lvl" id="sent-lvl-1">Простые</button>
+      <button class="sent-lvl" id="sent-lvl-2">Средние</button>
+    </div>
+
+    <!-- Session stats -->
+    <div class="session-bar">
+      <div class="s-stat"><span class="s-num" id="ss-total">0</span><span class="s-lbl">вопросов</span></div>
+      <div class="s-stat"><span class="s-num c-ok" id="ss-right">0</span><span class="s-lbl">верно</span></div>
+      <div class="s-stat"><span class="s-num" id="ss-acc">—</span><span class="s-lbl">точность</span></div>
+    </div>
+
+    <!-- Question card -->
+    <div class="question-card" id="sent-card">
+      <div class="sent-ru-label">Переведи на турецкий:</div>
+      <div class="sent-ru" id="sent-ru"></div>
+      <button class="sent-hint-btn" id="btn-sent-hint">💡 Показать подсказку</button>
+      <div class="sent-hint" id="sent-hint" style="display:none"></div>
+
+      <!-- Input -->
+      <div id="sent-input-area">
+        <input type="text" id="sent-answer" class="answer-input"
+          placeholder="Напишите по-турецки…"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-sent-check">Проверить</button>
+          <button class="btn btn-ghost" id="btn-sent-skip">Пропустить</button>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div id="sent-result-area" style="display:none">
+        <div class="res-top">
+          <span class="res-icon" id="sent-res-icon"></span>
+          <div>
+            <div class="res-verdict" id="sent-res-verdict"></div>
+            <div class="res-your" id="sent-res-your" style="display:none"></div>
+            <div class="res-correct" id="sent-res-correct"></div>
+          </div>
+        </div>
+        <div class="rule-box" id="sent-res-hint"></div>
+        <button class="btn btn-primary btn-full" id="btn-sent-next">Следующее →</button>
+      </div>
+    </div>
+  </div><!-- /sent -->
+
   <!-- ═══════════════ MY WORDS ═══════════════ -->
   <div id="page-words" class="page">
     <div class="page-title">Мои слова</div>
@@ -297,6 +349,9 @@
     </button>
     <button class="nav-btn" id="nav-stats">
       <span class="nav-icon">📊</span>Прогресс
+    </button>
+    <button class="nav-btn" id="nav-sent">
+      <span class="nav-icon">💬</span>Фразы
     </button>
     <button class="nav-btn" id="nav-words">
       <span class="nav-icon">➕</span>Слова

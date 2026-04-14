@@ -376,6 +376,7 @@ function render() {
 
   if (state.page === 'trainer') renderTrainer();
   if (state.page === 'stats')   renderStats();
+  if (state.page === 'sent')    renderSentences();
   if (state.page === 'words')   renderMyWords();
   if (state.page === 'ref')     renderRef();
 }
@@ -553,7 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (q) { state.word = q.word; state.cas = q.cas; }
 
   // Nav
-  ['trainer','stats','words','ref'].forEach(p =>
+  ['trainer','stats','sent','words','ref'].forEach(p =>
     $('nav-'+p).addEventListener('click', () => goPage(p)));
 
   // Check
@@ -568,6 +569,9 @@ document.addEventListener('DOMContentLoaded', () => {
       else nextQuestion();
     }
   });
+
+  // Sentences
+  initSentences();
 
   // My Words
   loadMyWords();
@@ -592,6 +596,135 @@ document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator)
     navigator.serviceWorker.register('/magarram/sw.js').catch(()=>{});
 });
+
+// ─── SENTENCES ────────────────────────────────────────────────────────────────
+const SENTENCES = [{"ru": "Я иду домой", "tr": "Eve gidiyorum", "hint": "дательный (eve)", "level": 1}, {"ru": "Кошка на столе", "tr": "Kedi masada", "hint": "местный (masada)", "level": 1}, {"ru": "Книга друга", "tr": "Arkadaşın kitabı", "hint": "родительный (arkadaşın) + притяжательный", "level": 1}, {"ru": "Я иду в школу", "tr": "Okula gidiyorum", "hint": "дательный (okula)", "level": 1}, {"ru": "Мама дома", "tr": "Anne evde", "hint": "местный (evde)", "level": 1}, {"ru": "Я вижу кошку", "tr": "Kediyi görüyorum", "hint": "винительный (kediyi)", "level": 1}, {"ru": "Я иду в парк", "tr": "Parka gidiyorum", "hint": "дательный (parka)", "level": 1}, {"ru": "Друг в школе", "tr": "Arkadaş okulda", "hint": "местный (okulda)", "level": 1}, {"ru": "Я читаю книгу", "tr": "Kitabı okuyorum", "hint": "винительный (kitabı)", "level": 1}, {"ru": "Я иду к врачу", "tr": "Doktora gidiyorum", "hint": "дательный (doktora)", "level": 1}, {"ru": "Машина друга", "tr": "Arkadaşın arabası", "hint": "родительный (arkadaşın) + притяжательный", "level": 1}, {"ru": "Кошка на стуле", "tr": "Kedi sandalyede", "hint": "местный (sandalyede)", "level": 1}, {"ru": "Я пью чай", "tr": "Çayı içiyorum", "hint": "винительный (çayı)", "level": 1}, {"ru": "Я иду из дома", "tr": "Evden gidiyorum", "hint": "исходный (evden)", "level": 1}, {"ru": "Кошка выходит из дома", "tr": "Kedi evden çıkıyor", "hint": "исходный (evden)", "level": 1}, {"ru": "Я даю воду кошке", "tr": "Kediye su veriyorum", "hint": "дательный (kediye)", "level": 1}, {"ru": "Стул у стола", "tr": "Sandalye masanın yanında", "hint": "родительный (masanın) + притяжательный", "level": 1}, {"ru": "Я в городе", "tr": "Şehirdeyim", "hint": "местный (şehirde)", "level": 1}, {"ru": "Я еду в город", "tr": "Şehre gidiyorum", "hint": "дательный (şehre)", "level": 1}, {"ru": "Я еду из города", "tr": "Şehirden geliyorum", "hint": "исходный (şehirden)", "level": 1}, {"ru": "Я вижу машину", "tr": "Arabayı görüyorum", "hint": "винительный (arabayı)", "level": 1}, {"ru": "Книга на столе", "tr": "Kitap masada", "hint": "местный (masada)", "level": 1}, {"ru": "Я покупаю воду", "tr": "Su satın alıyorum", "hint": "винительный (su — без суффикса, неопределённый)", "level": 1}, {"ru": "Я выхожу из школы", "tr": "Okuldan çıkıyorum", "hint": "исходный (okuldan)", "level": 1}, {"ru": "Мама готовит чай", "tr": "Anne çay yapıyor", "hint": "винительный (çay — без суффикса, неопределённый)", "level": 1}, {"ru": "Крыша дома", "tr": "Evin çatısı", "hint": "родительный (evin) + притяжательный", "level": 1}, {"ru": "Дверь школы", "tr": "Okulun kapısı", "hint": "родительный (okulun) + притяжательный", "level": 1}, {"ru": "Я иду к другу", "tr": "Arkadaşa gidiyorum", "hint": "дательный (arkadaşa)", "level": 1}, {"ru": "Кошка у врача", "tr": "Kedi doktorda", "hint": "местный (doktorda)", "level": 1}, {"ru": "Я беру книгу", "tr": "Kitabı alıyorum", "hint": "винительный (kitabı)", "level": 1}, {"ru": "Я иду на стул", "tr": "Sandalyeye oturuyorum", "hint": "дательный (sandalyeye)", "level": 1}, {"ru": "Врач в больнице", "tr": "Doktor hastanede", "hint": "местный (hastanede)", "level": 1}, {"ru": "Я беру стул", "tr": "Sandalyeyi alıyorum", "hint": "винительный (sandalyeyi)", "level": 1}, {"ru": "Мама читает книгу", "tr": "Anne kitabı okuyor", "hint": "винительный (kitabı)", "level": 1}, {"ru": "Я выхожу из парка", "tr": "Parktan çıkıyorum", "hint": "исходный (parktan)", "level": 1}, {"ru": "Вода на столе", "tr": "Su masada", "hint": "местный (masada)", "level": 1}, {"ru": "Я даю книгу другу", "tr": "Arkadaşa kitap veriyorum", "hint": "дательный (arkadaşa)", "level": 1}, {"ru": "Кот прыгает со стула", "tr": "Kedi sandalyeden atlıyor", "hint": "исходный (sandalyeden)", "level": 1}, {"ru": "Я смотрю на город", "tr": "Şehre bakıyorum", "hint": "дательный (şehre)", "level": 1}, {"ru": "Вода из реки", "tr": "Nehirden su", "hint": "исходный (nehirden)", "level": 1}, {"ru": "Дети идут из школы в парк", "tr": "Çocuklar okuldan parka gidiyor", "hint": "исходный (okuldan) + дательный (parka)", "level": 2}, {"ru": "Мама ставит чай на стол", "tr": "Anne çayı masaya koyuyor", "hint": "винительный (çayı) + дательный (masaya)", "level": 2}, {"ru": "Друг едет из города домой", "tr": "Arkadaş şehirden eve gidiyor", "hint": "исходный (şehirden) + дательный (eve)", "level": 2}, {"ru": "Я несу книгу в школу", "tr": "Kitabı okula götürüyorum", "hint": "винительный (kitabı) + дательный (okula)", "level": 2}, {"ru": "Кошка пьёт воду из миски", "tr": "Kedi kaseden su içiyor", "hint": "исходный (kaseden) + именительный (su)", "level": 2}, {"ru": "Врач читает книгу в парке", "tr": "Doktor parkta kitap okuyor", "hint": "местный (parkta)", "level": 2}, {"ru": "Мама кладёт книгу на стол", "tr": "Anne kitabı masaya koyuyor", "hint": "винительный (kitabı) + дательный (masaya)", "level": 2}, {"ru": "Я вижу машину друга", "tr": "Arkadaşın arabasını görüyorum", "hint": "родительный (arkadaşın) + винительный (arabasını)", "level": 2}, {"ru": "Мы идём из парка в школу", "tr": "Parktan okula gidiyoruz", "hint": "исходный (parktan) + дательный (okula)", "level": 2}, {"ru": "Я пью чай дома", "tr": "Evde çay içiyorum", "hint": "местный (evde)", "level": 2}, {"ru": "Дети играют в парке", "tr": "Çocuklar parkta oynuyor", "hint": "местный (parkta)", "level": 2}, {"ru": "Я еду из дома в город", "tr": "Evden şehre gidiyorum", "hint": "исходный (evden) + дательный (şehre)", "level": 2}, {"ru": "Мама даёт воду кошке", "tr": "Anne kediye su veriyor", "hint": "дательный (kediye)", "level": 2}, {"ru": "Я ставлю стул у стола", "tr": "Sandalyeyi masanın yanına koyuyorum", "hint": "винительный (sandalyeyi) + родительный (masanın)", "level": 2}, {"ru": "Друг берёт книгу со стола", "tr": "Arkadaş kitabı masadan alıyor", "hint": "винительный (kitabı) + исходный (masadan)", "level": 2}, {"ru": "Мы едем в город на машине", "tr": "Şehre arabayla gidiyoruz", "hint": "дательный (şehre) + творительный инструм. (arabayla)", "level": 2}, {"ru": "Врач выходит из больницы", "tr": "Doktor hastaneden çıkıyor", "hint": "исходный (hastaneden)", "level": 2}, {"ru": "Я вижу парк из окна", "tr": "Pencereden parkı görüyorum", "hint": "исходный (pencereden) + винительный (parkı)", "level": 2}, {"ru": "Кошка прыгает на стол", "tr": "Kedi masaya atlıyor", "hint": "дательный (masaya)", "level": 2}, {"ru": "Я читаю книгу друга", "tr": "Arkadaşın kitabını okuyorum", "hint": "родительный (arkadaşın) + винительный (kitabını)", "level": 2}, {"ru": "Мама идёт к врачу с другом", "tr": "Anne arkadaşıyla doktora gidiyor", "hint": "дательный (doktora) + инструм. (arkadaşıyla)", "level": 2}, {"ru": "Я беру воду из холодильника", "tr": "Buzdolabından suyu alıyorum", "hint": "исходный (buzdolabından) + винительный (suyu)", "level": 2}, {"ru": "Книга лежит на стуле", "tr": "Kitap sandalyede duruyor", "hint": "местный (sandalyede)", "level": 2}, {"ru": "Дети бегут из парка домой", "tr": "Çocuklar parktan eve koşuyor", "hint": "исходный (parktan) + дательный (eve)", "level": 2}, {"ru": "Я даю маме чай", "tr": "Anneye çay veriyorum", "hint": "дательный (anneye)", "level": 2}, {"ru": "Машина стоит у дома", "tr": "Araba evin önünde duruyor", "hint": "родительный (evin) + притяжательный", "level": 2}, {"ru": "Я покупаю книгу для друга", "tr": "Arkadaşım için kitap alıyorum", "hint": "послелог için + родительный (arkadaşım)", "level": 2}, {"ru": "Мы едем из школы в парк", "tr": "Okuldan parka gidiyoruz", "hint": "исходный (okuldan) + дательный (parka)", "level": 2}, {"ru": "Мама ставит воду на стол", "tr": "Anne suyu masaya koyuyor", "hint": "винительный (suyu) + дательный (masaya)", "level": 2}, {"ru": "Я вижу кошку на столе", "tr": "Masadaki kediyi görüyorum", "hint": "местный (masadaki) + винительный (kediyi)", "level": 2}, {"ru": "Врач говорит маме о болезни", "tr": "Doktor anneye hastalık hakkında söylüyor", "hint": "дательный (anneye)", "level": 2}, {"ru": "Друг едет из парка к маме", "tr": "Arkadaş parktan anneye gidiyor", "hint": "исходный (parktan) + дательный (anneye)", "level": 2}, {"ru": "Я несу чай маме", "tr": "Anneye çay götürüyorum", "hint": "дательный (anneye)", "level": 2}, {"ru": "Кошка выходит из комнаты", "tr": "Kedi odadan çıkıyor", "hint": "исходный (odadan)", "level": 2}, {"ru": "Я ставлю книгу на стул", "tr": "Kitabı sandalyeye koyuyorum", "hint": "винительный (kitabı) + дательный (sandalyeye)", "level": 2}, {"ru": "Мама читает книгу в комнате", "tr": "Anne odada kitap okuyor", "hint": "местный (odada)", "level": 2}, {"ru": "Я смотрю на машину друга", "tr": "Arkadaşın arabasına bakıyorum", "hint": "родительный (arkadaşın) + дательный (arabasına)", "level": 2}, {"ru": "Врач пьёт чай в парке", "tr": "Doktor parkta çay içiyor", "hint": "местный (parkta)", "level": 2}, {"ru": "Я еду из города к другу", "tr": "Şehirden arkadaşa gidiyorum", "hint": "исходный (şehirden) + дательный (arkadaşa)", "level": 2}, {"ru": "Кошка лежит на книге", "tr": "Kedi kitabın üzerinde yatıyor", "hint": "родительный (kitabın) + притяжательный", "level": 2}];
+
+let sentState = {
+  current: null,
+  phase: 'q',
+  levelFilter: 0, // 0=all, 1=simple, 2=medium
+  session: { total: 0, right: 0 }
+};
+
+function pickSentence() {
+  const pool = sentState.levelFilter === 0 ? SENTENCES
+    : SENTENCES.filter(s => s.level === sentState.levelFilter);
+  if (!pool.length) return null;
+  let s;
+  let tries = 0;
+  do {
+    s = pool[Math.floor(Math.random() * pool.length)];
+    tries++;
+  } while (tries < 15 && sentState.current && s.ru === sentState.current.ru);
+  return s;
+}
+
+function normalizeTr(s) {
+  return s.trim().toLowerCase()
+    .replace(/[.,!?;:]+/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+function renderSentences() {
+  if (!sentState.current) sentState.current = pickSentence();
+  const s = sentState.current;
+  if (!s) return;
+
+  $('sent-ru').textContent = s.ru;
+  $('sent-hint').textContent = s.hint;
+  $('sent-hint').style.display = 'none';
+  $('btn-sent-hint').style.display = '';
+
+  const acc = sentState.session.total > 0
+    ? Math.round(sentState.session.right / sentState.session.total * 100) : null;
+  $('ss-total').textContent = sentState.session.total;
+  $('ss-right').textContent = sentState.session.right;
+  $('ss-acc').textContent = acc !== null ? acc + '%' : '—';
+
+  if (sentState.phase === 'q') {
+    $('sent-input-area').style.display = '';
+    $('sent-result-area').style.display = 'none';
+    $('sent-answer').value = '';
+    setTimeout(() => $('sent-answer').focus(), 50);
+  } else {
+    $('sent-input-area').style.display = 'none';
+    $('sent-result-area').style.display = '';
+  }
+
+  // Level filter buttons
+  document.querySelectorAll('.sent-lvl').forEach(b => b.classList.remove('active'));
+  if (sentState.levelFilter === 0) $('sent-lvl-all').classList.add('active');
+  else if (sentState.levelFilter === 1) $('sent-lvl-1').classList.add('active');
+  else $('sent-lvl-2').classList.add('active');
+}
+
+function checkSentAnswer() {
+  const s = sentState.current;
+  if (!s) return;
+  const answer = normalizeTr($('sent-answer').value);
+  const correct = normalizeTr(s.tr);
+  const isRight = answer === correct;
+
+  sentState.session.total++;
+  if (isRight) sentState.session.right++;
+  sentState.phase = 'result';
+
+  $('sent-res-icon').textContent = isRight ? '✅' : '❌';
+  $('sent-res-verdict').textContent = isRight ? 'Правильно!' : 'Неверно';
+  $('sent-res-verdict').className = 'res-verdict ' + (isRight ? 'c-ok' : 'c-err');
+
+  if (!isRight) {
+    $('sent-res-your').style.display = '';
+    $('sent-res-your').textContent = 'Ваш ответ: ' + ($('sent-answer').value || '—');
+  } else {
+    $('sent-res-your').style.display = 'none';
+  }
+
+  $('sent-res-correct').innerHTML = '<b>' + s.tr + '</b>';
+  $('sent-res-hint').textContent = s.hint;
+  renderSentences();
+}
+
+function nextSentence() {
+  sentState.current = pickSentence();
+  sentState.phase = 'q';
+  renderSentences();
+}
+
+function initSentences() {
+  sentState.current = pickSentence();
+
+  $('btn-sent-check').addEventListener('click', checkSentAnswer);
+  $('btn-sent-skip').addEventListener('click', () => {
+    sentState.session.total++;
+    sentState.phase = 'result';
+    const s = sentState.current;
+    $('sent-res-icon').textContent = '⏭️';
+    $('sent-res-verdict').textContent = 'Пропущено';
+    $('sent-res-verdict').className = 'res-verdict c-skip';
+    $('sent-res-your').style.display = 'none';
+    $('sent-res-correct').innerHTML = '<b>' + s.tr + '</b>';
+    $('sent-res-hint').textContent = s.hint;
+    renderSentences();
+  });
+  $('btn-sent-next').addEventListener('click', nextSentence);
+  $('btn-sent-hint').addEventListener('click', () => {
+    $('sent-hint').style.display = '';
+    $('btn-sent-hint').style.display = 'none';
+  });
+  $('sent-answer').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (sentState.phase === 'q') checkSentAnswer();
+      else nextSentence();
+    }
+  });
+
+  // Level filter
+  $('sent-lvl-all').addEventListener('click', () => { sentState.levelFilter = 0; sentState.current = pickSentence(); sentState.phase = 'q'; renderSentences(); });
+  $('sent-lvl-1').addEventListener('click',   () => { sentState.levelFilter = 1; sentState.current = pickSentence(); sentState.phase = 'q'; renderSentences(); });
+  $('sent-lvl-2').addEventListener('click',   () => { sentState.levelFilter = 2; sentState.current = pickSentence(); sentState.phase = 'q'; renderSentences(); });
+}
 
 // ─── MY WORDS ──────────────────────────────────────────────────────────────────
 let myWords = [];
