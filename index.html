@@ -35,6 +35,9 @@
   <!-- ═══════════════ TRAINER ═══════════════ -->
   <div id="page-trainer" class="page">
 
+    <!-- Category filter -->
+    <div class="cat-filter" id="cat-filter"></div>
+
     <!-- Session bar -->
     <div class="session-bar">
       <div class="s-stat"><span class="s-num" id="s-total">0</span><span class="s-lbl">вопросов</span></div>
@@ -420,6 +423,14 @@
   <div id="page-sent" class="page">
     <div class="page-title">Предложения</div>
 
+    <!-- Mode switch: Фразы / Диалоги -->
+    <div class="mode-switch">
+      <button class="mode-btn active" id="mode-phrases">Фразы</button>
+      <button class="mode-btn" id="mode-dialogs">Диалоги</button>
+    </div>
+
+    <!-- === PHRASES SECTION === -->
+    <div id="phrases-section">
     <!-- Level filter -->
     <div class="sent-filter">
       <button class="sent-lvl active" id="sent-lvl-all">Все</button>
@@ -466,6 +477,56 @@
         <button class="btn btn-primary btn-full" id="btn-sent-next">Следующее →</button>
       </div>
     </div>
+    </div><!-- /phrases-section -->
+
+    <!-- === DIALOGS SECTION === -->
+    <div id="dialogs-section" style="display:none">
+      <!-- Dialog topic filter -->
+      <div class="cat-filter" id="dlg-topic-filter"></div>
+
+      <!-- Dialog session stats -->
+      <div class="session-bar">
+        <div class="s-stat"><span class="s-num" id="ds-total">0</span><span class="s-lbl">вопросов</span></div>
+        <div class="s-stat"><span class="s-num c-ok" id="ds-right">0</span><span class="s-lbl">верно</span></div>
+        <div class="s-stat"><span class="s-num" id="ds-acc">—</span><span class="s-lbl">точность</span></div>
+      </div>
+
+      <!-- Dialog card -->
+      <div class="question-card" id="dlg-card">
+        <div class="dlg-topic-badge" id="dlg-topic-badge"></div>
+        <div class="dlg-q-label">Вопрос:</div>
+        <div class="dlg-question" id="dlg-question"></div>
+        <div class="dlg-q-tr" id="dlg-question-tr"></div>
+        <button class="sent-hint-btn" id="btn-dlg-hint">💡 Показать подсказку</button>
+        <div class="sent-hint" id="dlg-hint" style="display:none"></div>
+
+        <!-- Input -->
+        <div id="dlg-input-area">
+          <input type="text" id="dlg-answer" class="answer-input"
+            placeholder="Напишите ответ по-турецки…"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btn-dlg-check">Проверить</button>
+            <button class="btn btn-ghost" id="btn-dlg-skip">Пропустить</button>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div id="dlg-result-area" style="display:none">
+          <div class="res-top">
+            <span class="res-icon" id="dlg-res-icon"></span>
+            <div>
+              <div class="res-verdict" id="dlg-res-verdict"></div>
+              <div class="res-your" id="dlg-res-your" style="display:none"></div>
+              <div class="res-correct" id="dlg-res-correct"></div>
+            </div>
+          </div>
+          <div class="rule-box" id="dlg-res-hint"></div>
+          <button class="btn btn-primary btn-full" id="btn-dlg-next">Следующий →</button>
+        </div>
+      </div>
+    </div><!-- /dialogs-section -->
+
   </div><!-- /sent -->
 
   <!-- ═══════════════ MY WORDS ═══════════════ -->

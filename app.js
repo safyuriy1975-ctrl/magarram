@@ -426,6 +426,7 @@ let state = {
   history: [],         // last 30 attempts
   byCas: {},           // {casId: {t,r}}
   enabledCases: new Set(['nom','gen','acc','dat','loc','abl']),
+  catFilter: null,     // null = all categories
 };
 
 // Persist with graceful localStorage fallback
@@ -447,12 +448,45 @@ function pickQuestion(prev) {
   let word, cas;
   let tries = 0;
   do {
-    const allW = getAllWords();
+    const allW = getFilteredWords();
+    if (!allW.length) return null;
     word = allW[Math.floor(Math.random()*allW.length)];
     cas  = cases[Math.floor(Math.random()*cases.length)];
     tries++;
   } while (tries < 20 && prev && word.w === prev.word.w && cas.id === prev.cas.id);
   return { word, cas };
+}
+
+function getFilteredWords() {
+  const all = getAllWords();
+  if (!state.catFilter) return all;
+  return all.filter(w => w.cat === state.catFilter);
+}
+
+function getCategories() {
+  const cats = new Set();
+  getAllWords().forEach(w => cats.add(w.cat));
+  return Array.from(cats);
+}
+
+function renderCatFilter() {
+  const el = $('cat-filter');
+  if (!el) return;
+  const cats = getCategories();
+  let html = '<button class="cat-btn' + (!state.catFilter ? ' active' : '') + '" data-cat="">\u0412\u0441\u0435</button>';
+  cats.forEach(c => {
+    html += '<button class="cat-btn' + (state.catFilter === c ? ' active' : '') + '" data-cat="' + c + '">' + c + '</button>';
+  });
+  el.innerHTML = html;
+  el.querySelectorAll('.cat-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      state.catFilter = b.dataset.cat || null;
+      const q = pickQuestion(null);
+      if (q) { state.word = q.word; state.cas = q.cas; state.phase = 'q'; }
+      $('answer-input').value = '';
+      render();
+    });
+  });
 }
 
 // ─── RENDER ────────────────────────────────────────────────────────────────────
@@ -464,7 +498,7 @@ function render() {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   $('nav-'+state.page).classList.add('active');
 
-  if (state.page === 'trainer') renderTrainer();
+  if (state.page === 'trainer') { renderCatFilter(); renderTrainer(); }
   if (state.page === 'stats')   renderStats();
   if (state.page === 'sent')    renderSentences();
   if (state.page === 'words')   renderMyWords();
@@ -662,6 +696,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Sentences
   initSentences();
+
+  // Dialogs
+  initDialogs();
 
   // My Words
   loadMyWords();
@@ -887,4 +924,215 @@ function renderMyWords() {
       <button class="my-word-del" onclick="deleteMyWord('${w.w}')">удалить</button>
     </div>
   `).join('');
+}
+
+// ─── DIALOGS ─────────────────────────────────────────────────────────────────────────
+const DIALOGS = [
+  // Отель
+  {topic:'отель', q_ru:'Есть свободный номер?', q_tr:'Bo\u015f odan\u0131z var m\u0131?', a_tr:'Evet, bo\u015f odam\u0131z var', hint:'боş = свободный, oda = номер'},
+  {topic:'отель', q_ru:'На сколько человек?', q_tr:'Ka\u00e7 ki\u015fi i\u00e7in?', a_tr:'\u0130ki ki\u015fi i\u00e7in', hint:'ka\u00e7 = сколько, ki\u015fi = человек'},
+  {topic:'отель', q_ru:'Паспорт можно?', q_tr:'Pasaportunuzu alabilir miyim?', a_tr:'Tabii, buyurun', hint:'pasaport = паспорт, alabilir miyim = могу взять?'},
+  {topic:'отель', q_ru:'Бронирование есть?', q_tr:'Rezervasyonunuz var m\u0131?', a_tr:'Evet, rezervasyonum var', hint:'rezervasyon = бронирование'},
+  {topic:'отель', q_ru:'Кахвалты включен?', q_tr:'Kahvalt\u0131 dahil mi?', a_tr:'Evet, kahvalt\u0131 dahil', hint:'kahvalt\u0131 = завтрак, dahil = включено'},
+  {topic:'отель', q_ru:'Сколько стоит номер?', q_tr:'Oda fiyat\u0131 ne kadar?', a_tr:'Bir gecelik \u00fc\u00e7 bin lira', hint:'fiyat = цена, ne kadar = сколько'},
+  {topic:'отель', q_ru:'Всё оплачено?', q_tr:'Her \u015feyi \u00f6dediniz mi?', a_tr:'Evet, her \u015feyi \u00f6dedim', hint:'\u00f6demek = оплатить, her \u015fey = всё'},
+
+  // Кафе / Ресторан
+  {topic:'кафе', q_ru:'Могу я заказать?', q_tr:'Sipari\u015f edebilir miyim?', a_tr:'Tabii, buyurun', hint:'sipari\u015f = заказ'},
+  {topic:'кафе', q_ru:'Могу попробовать?', q_tr:'Tadabilir miyim?', a_tr:'Tabii, buyurun', hint:'tatmak = пробовать'},
+  {topic:'кафе', q_ru:'Можете принести?', q_tr:'Getirebilir misiniz?', a_tr:'Tabii, hemen getiriyorum', hint:'getirmek = принести'},
+  {topic:'кафе', q_ru:'Можете дать?', q_tr:'Verebilir misiniz?', a_tr:'Tabii, buyurun', hint:'vermek = дать'},
+  {topic:'кафе', q_ru:'Могу сесть за этот стол?', q_tr:'Bu masaya oturabilir miyim?', a_tr:'Tabii, oturabilirsiniz', hint:'masa = стол, oturmak = сидеть, -ya дательный'},
+  {topic:'кафе', q_ru:'Что будете пить?', q_tr:'Ne i\u00e7eceksiniz?', a_tr:'Bir \u00e7ay l\u00fctfen', hint:'и\u00e7mek = пить, ne = что'},
+  {topic:'кафе', q_ru:'Что порекомендуете?', q_tr:'Ne tavsiye edersiniz?', a_tr:'Bug\u00fcn\u00fcn \u00f6zel yeme\u011fi \u00e7ok g\u00fczel', hint:'tavsiye = рекомендация'},
+  {topic:'кафе', q_ru:'Счёт, пожалуйста', q_tr:'Hesap l\u00fctfen', a_tr:'Tabii, hemen getiriyorum', hint:'hesap = счёт'},
+  {topic:'кафе', q_ru:'Сколько это стоит?', q_tr:'Bunun fiyat\u0131 ne kadar?', a_tr:'Y\u00fcz elli lira', hint:'bunun = этого (род.), fiyat = цена'},
+  {topic:'кафе', q_ru:'Хочу зелёный чай', q_tr:'Ye\u015fil \u00e7ay istiyorum', a_tr:'Tabii, hemen getiriyorum', hint:'ye\u015fil = зелёный, \u00e7ay = чай'},
+
+  // Аптека / Магазин
+  {topic:'магазин', q_ru:'У вас есть такая вещь?', q_tr:'Sizde b\u00f6yle \u015fey var m\u0131?', a_tr:'Evet, var', hint:'sizde = у вас (местный), b\u00f6yle = такой'},
+  {topic:'магазин', q_ru:'Сколько стоит лекарство?', q_tr:'Bu ila\u00e7\u0131n fiyat\u0131 ne kadar?', a_tr:'Y\u00fcz lira', hint:'ila\u00e7 = лекарство, fiyat = цена (родительный)'},
+  {topic:'магазин', q_ru:'Могу купить это?', q_tr:'Bunu alabilir miyim?', a_tr:'Tabii, alabilirsiniz', hint:'bunu = это (вин.), almak = купить'},
+  {topic:'магазин', q_ru:'Могу оплатить?', q_tr:'\u00d6deyebilir miyim?', a_tr:'Tabii', hint:'\u00f6demek = оплатить'},
+  {topic:'магазин', q_ru:'Картой можно?', q_tr:'Kartla \u00f6deyebilir miyim?', a_tr:'Evet, kartla \u00f6deyebilirsiniz', hint:'kartla = картой'},
+  {topic:'магазин', q_ru:'Наличными можно?', q_tr:'Nakit \u00f6deyebilir miyim?', a_tr:'Evet, nakit de olur', hint:'nakit = наличными'},
+  {topic:'магазин', q_ru:'Скидка есть?', q_tr:'\u0130ndirim var m\u0131?', a_tr:'Evet, y\u00fczde yirmi indirim var', hint:'indirim = скидка'},
+  {topic:'магазин', q_ru:'Я хочу купить такую вещь', q_tr:'Ben b\u00f6yle \u015feyi almak istiyorum', a_tr:'Buyurun, hangi renk istersiniz?', hint:'\u015feyi = вещь (вин.), almak = купить'},
+  {topic:'магазин', q_ru:'Пакет нужен?', q_tr:'Po\u015fet ister misiniz?', a_tr:'Evet, bir po\u015fet l\u00fctfen', hint:'po\u015fet = пакет'},
+  {topic:'магазин', q_ru:'Чек нужен?', q_tr:'Fi\u015f ister misiniz?', a_tr:'Evet, fi\u015f l\u00fctfen', hint:'fi\u015f = чек'},
+
+  // Аренда
+  {topic:'аренда', q_ru:'Хотите арендовать квартиру?', q_tr:'Daire kiralamak istiyor musunuz?', a_tr:'Evet, daire kiralamak istiyorum', hint:'daire = квартира, kiralamak = арендовать'},
+  {topic:'аренда', q_ru:'Эту квартиру могу арендовать?', q_tr:'Bu daireyi kiralayabilir miyim?', a_tr:'Evet, kiralayabilirsiniz', hint:'daireyi = квартиру (вин.)'},
+  {topic:'аренда', q_ru:'За 15 тыс. лир могу арендовать?', q_tr:'On be\u015f bin liraya kiralayabilir miyim?', a_tr:'Evet, kiralayabilirsiniz', hint:'liraya = дат. (за ... лир)'},
+  {topic:'аренда', q_ru:'Договор составим?', q_tr:'Kira s\u00f6zle\u015fmesi yapabilir miyiz?', a_tr:'Tabii, yapabiliriz', hint:'s\u00f6zle\u015fme = договор, yapmak = делать'},
+  {topic:'аренда', q_ru:'Квартира в центре?', q_tr:'Daire merkezde mi?', a_tr:'Evet, merkezde', hint:'merkez = центр, -de = местный'},
+  {topic:'аренда', q_ru:'Квартира с мебелью?', q_tr:'Daire e\u015fyal\u0131 m\u0131?', a_tr:'Evet, e\u015fyal\u0131', hint:'e\u015fyal\u0131 = с мебелью'},
+  {topic:'аренда', q_ru:'Сколько комнат?', q_tr:'Ka\u00e7 oda?', a_tr:'\u00dc\u00e7 oda bir salon', hint:'oda = комната, salon = гостиная'},
+
+  // Приветствие / Общее
+  {topic:'общее', q_ru:'Как дела?', q_tr:'Nas\u0131ls\u0131n\u0131z?', a_tr:'\u0130yiyim, te\u015fekk\u00fcr ederim', hint:'nas\u0131l = как'},
+  {topic:'общее', q_ru:'Откуда вы?', q_tr:'Nerelisiniz?', a_tr:'Rusyal\u0131y\u0131m', hint:'nereli = откуда'},
+  {topic:'общее', q_ru:'Говорите по-русски?', q_tr:'Rus\u00e7a biliyor musunuz?', a_tr:'Hay\u0131r, T\u00fcrk\u00e7e \u00f6\u011freniyorum', hint:'Rus\u00e7a = по-русски, bilmek = знать'},
+  {topic:'общее', q_ru:'Помогите, пожалуйста', q_tr:'Yard\u0131m edebilir misiniz?', a_tr:'Tabii, nas\u0131l yard\u0131m edebilirim?', hint:'yard\u0131m = помощь'},
+  {topic:'общее', q_ru:'Где туалет?', q_tr:'Tuvalet nerede?', a_tr:'D\u00fczg\u00fcn gidince solda', hint:'nerede = где'},
+  {topic:'общее', q_ru:'Это сколько стоит?', q_tr:'Bu ne kadar?', a_tr:'Elli lira', hint:'ne kadar = сколько'},
+];
+
+let dlgState = {
+  current: null,
+  phase: 'q',
+  topicFilter: null, // null = all
+  session: { total: 0, right: 0 },
+  sentMode: 'phrases', // phrases | dialogs
+};
+
+function getDlgTopics() {
+  const ts = new Set();
+  DIALOGS.forEach(d => ts.add(d.topic));
+  return Array.from(ts);
+}
+
+function pickDialog() {
+  const pool = dlgState.topicFilter
+    ? DIALOGS.filter(d => d.topic === dlgState.topicFilter)
+    : DIALOGS;
+  if (!pool.length) return null;
+  let d, tries = 0;
+  do {
+    d = pool[Math.floor(Math.random() * pool.length)];
+    tries++;
+  } while (tries < 15 && dlgState.current && d.q_ru === dlgState.current.q_ru);
+  return d;
+}
+
+function renderDlgTopicFilter() {
+  const el = $('dlg-topic-filter');
+  if (!el) return;
+  const topics = getDlgTopics();
+  let html = '<button class="cat-btn' + (!dlgState.topicFilter ? ' active' : '') + '" data-topic="">Все</button>';
+  topics.forEach(t => {
+    html += '<button class="cat-btn' + (dlgState.topicFilter === t ? ' active' : '') + '" data-topic="' + t + '">' + t + '</button>';
+  });
+  el.innerHTML = html;
+  el.querySelectorAll('.cat-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      dlgState.topicFilter = b.dataset.topic || null;
+      dlgState.current = pickDialog();
+      dlgState.phase = 'q';
+      renderDialogs();
+    });
+  });
+}
+
+function renderDialogs() {
+  if (!dlgState.current) dlgState.current = pickDialog();
+  const d = dlgState.current;
+  if (!d) return;
+
+  renderDlgTopicFilter();
+
+  // Topic badge
+  $('dlg-topic-badge').textContent = d.topic;
+
+  // Question
+  $('dlg-question').textContent = d.q_ru;
+  $('dlg-question-tr').textContent = d.q_tr;
+  $('dlg-hint').textContent = d.hint;
+  $('dlg-hint').style.display = 'none';
+  $('btn-dlg-hint').style.display = '';
+
+  // Stats
+  const acc = dlgState.session.total > 0
+    ? Math.round(dlgState.session.right / dlgState.session.total * 100) : null;
+  $('ds-total').textContent = dlgState.session.total;
+  $('ds-right').textContent = dlgState.session.right;
+  $('ds-acc').textContent = acc !== null ? acc + '%' : '\u2014';
+
+  if (dlgState.phase === 'q') {
+    $('dlg-input-area').style.display = '';
+    $('dlg-result-area').style.display = 'none';
+    $('dlg-answer').value = '';
+    setTimeout(() => $('dlg-answer').focus(), 50);
+  } else {
+    $('dlg-input-area').style.display = 'none';
+    $('dlg-result-area').style.display = '';
+  }
+}
+
+function checkDlgAnswer() {
+  const d = dlgState.current;
+  if (!d) return;
+  const answer = normalizeTr($('dlg-answer').value);
+  const correct = normalizeTr(d.a_tr);
+  const isRight = answer === correct;
+
+  dlgState.session.total++;
+  if (isRight) dlgState.session.right++;
+  dlgState.phase = 'result';
+
+  $('dlg-res-icon').textContent = isRight ? '\u2705' : '\u274C';
+  $('dlg-res-verdict').textContent = isRight ? '\u041f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e!' : '\u041d\u0435\u0432\u0435\u0440\u043d\u043e';
+  $('dlg-res-verdict').className = 'res-verdict ' + (isRight ? 'c-ok' : 'c-err');
+
+  if (!isRight) {
+    $('dlg-res-your').style.display = '';
+    $('dlg-res-your').textContent = '\u0412\u0430\u0448 \u043e\u0442\u0432\u0435\u0442: ' + ($('dlg-answer').value || '\u2014');
+  } else {
+    $('dlg-res-your').style.display = 'none';
+  }
+
+  $('dlg-res-correct').innerHTML = '<b>' + d.a_tr + '</b>';
+  $('dlg-res-hint').textContent = d.hint;
+  renderDialogs();
+}
+
+function nextDialog() {
+  dlgState.current = pickDialog();
+  dlgState.phase = 'q';
+  renderDialogs();
+}
+
+function switchSentMode(mode) {
+  dlgState.sentMode = mode;
+  $('phrases-section').style.display = mode === 'phrases' ? '' : 'none';
+  $('dialogs-section').style.display = mode === 'dialogs' ? '' : 'none';
+  $('mode-phrases').classList.toggle('active', mode === 'phrases');
+  $('mode-dialogs').classList.toggle('active', mode === 'dialogs');
+  if (mode === 'dialogs') renderDialogs();
+  else renderSentences();
+}
+
+function initDialogs() {
+  dlgState.current = pickDialog();
+
+  // Mode switch
+  $('mode-phrases').addEventListener('click', () => switchSentMode('phrases'));
+  $('mode-dialogs').addEventListener('click', () => switchSentMode('dialogs'));
+
+  // Dialog buttons
+  $('btn-dlg-check').addEventListener('click', checkDlgAnswer);
+  $('btn-dlg-skip').addEventListener('click', () => {
+    dlgState.session.total++;
+    dlgState.phase = 'result';
+    const d = dlgState.current;
+    $('dlg-res-icon').textContent = '\u23ED\uFE0F';
+    $('dlg-res-verdict').textContent = '\u041f\u0440\u043e\u043f\u0443\u0449\u0435\u043d\u043e';
+    $('dlg-res-verdict').className = 'res-verdict c-skip';
+    $('dlg-res-your').style.display = 'none';
+    $('dlg-res-correct').innerHTML = '<b>' + d.a_tr + '</b>';
+    $('dlg-res-hint').textContent = d.hint;
+    renderDialogs();
+  });
+  $('btn-dlg-next').addEventListener('click', nextDialog);
+  $('btn-dlg-hint').addEventListener('click', () => {
+    $('dlg-hint').style.display = '';
+    $('btn-dlg-hint').style.display = 'none';
+  });
+  $('dlg-answer').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (dlgState.phase === 'q') checkDlgAnswer();
+      else nextDialog();
+    }
+  });
 }
