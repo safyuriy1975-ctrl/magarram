@@ -758,3 +758,59 @@ input  { font: inherit; }
   border-radius: 8px;
   border-left: 3px solid #0d7c8a;
 }
+
+/* ── How-to instruction tabs ─────────────────── */
+.ref-howto-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.ref-howto-tab {
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(255,255,255,.12);
+  color: #a0aec0;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.ref-howto-tab.active {
+  background: rgba(13,124,138,.25);
+  border-color: #0d7c8a;
+  color: #81e6d9;
+}
+.ref-howto-step {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  font-size: 13.5px;
+  color: #cbd5e0;
+  line-height: 1.5;
+}
+.ref-howto-num {
+  min-width: 22px;
+  height: 22px;
+  background: #0d7c8a;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.ref-howto-tip {
+  background: rgba(246,173,85,.1);
+  border-left: 3px solid #f6ad55;
+  padding: 8px 12px;
+  border-radius: 0 8px 8px 0;
+  font-size: 12.5px;
+  color: #fbd38d;
+  margin-top: 4px;
+}

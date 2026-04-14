@@ -1227,3 +1227,12 @@ function initDialogs() {
     }
   });
 }
+
+// ─── HOW-TO TABS ──────────────────────────────────────────────────────────────
+function showHowto(id, btn) {
+  document.querySelectorAll('.ref-howto-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.ref-howto-tab').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('howto-' + id);
+  if (panel) panel.style.display = '';
+  if (btn) btn.classList.add('active');
+}

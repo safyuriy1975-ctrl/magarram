@@ -122,6 +122,59 @@
   <div id="page-ref" class="page">
     <div class="page-title">Справочник</div>
 
+    <!-- Инструкция -->
+    <div class="ref-insight" id="ref-howto">
+      <div class="ref-insight-title">📱 Как пользоваться приложением</div>
+      <div class="ref-insight-body">
+        <div class="ref-howto-tabs">
+          <button class="ref-howto-tab active" onclick="showHowto('trainer',this)">✏️ Тренажёр</button>
+          <button class="ref-howto-tab" onclick="showHowto('sent',this)">💬 Фразы</button>
+          <button class="ref-howto-tab" onclick="showHowto('words',this)">➕ Слова</button>
+          <button class="ref-howto-tab" onclick="showHowto('stats',this)">📊 Прогресс</button>
+          <button class="ref-howto-tab" onclick="showHowto('ref',this)">📖 Справка</button>
+        </div>
+
+        <div class="ref-howto-panel" id="howto-trainer">
+          <div class="ref-howto-step"><span class="ref-howto-num">1</span><span>Выберите <b>категорию слов</b> в горизонтальной полоске вверху (Все, Еда, Животные, Числа…). Можно листать.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">2</span><span>Появится слово на русском и <b>падеж</b>, который нужно применить.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">3</span><span>Введите форму слова на турецком и нажмите <b>Проверить</b> или клавишу Enter.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">4</span><span>Приложение покажет, правильно ли, и отобразит правильный ответ с подсказкой.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">5</span><span>Нажмите <b>Далее</b> для следующего слова. Карточка с результатом также переключается по Enter.</span></div>
+          <div class="ref-howto-tip">💡 Статус сессии (количество попыток и точность) виден в полоске над карточкой.</div>
+        </div>
+
+        <div class="ref-howto-panel" id="howto-sent" style="display:none">
+          <div class="ref-howto-step"><span class="ref-howto-num">1</span><span>Вкладка делится на два режима: <b>Фразы</b> и <b>Диалоги</b> — переключайте кнопками вверху.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">2</span><span><b>Фразы:</b> выберите уровень (Все / Простые / Средние). Читайте русское предложение, переводите на турецкий.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">3</span><span>После проверки показывается правильный перевод и <b>подсказка</b> о падежах.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">4</span><span><b>Диалоги:</b> выберите тему (Отель, Кафе, Магазин, Аренда…). Отвечайте на турецкий вопрос на турецком.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">5</span><span>Диалоги имитируют живые разговоры — полезно для подготовки к реальным ситуациям.</span></div>
+          <div class="ref-howto-tip">💡 Регистр букв не важен — приложение принимает ответы без учёта заглавных букв.</div>
+        </div>
+
+        <div class="ref-howto-panel" id="howto-words" style="display:none">
+          <div class="ref-howto-step"><span class="ref-howto-num">1</span><span>Здесь можно добавить <b>своё слово</b>: введите турецкий вариант, русский перевод и выберите категорию.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">2</span><span>Свои слова автоматически <b>попадают в тренажёр</b> вместе со стандартными словами.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">3</span><span>Добавленные слова хранятся в памяти устройства и не исчезают при перезагрузке.</span></div>
+          <div class="ref-howto-tip">💡 Чтобы тренировать только свои слова — выберите в тренажёре категорию, которую вы указали.</div>
+        </div>
+
+        <div class="ref-howto-panel" id="howto-stats" style="display:none">
+          <div class="ref-howto-step"><span class="ref-howto-num">1</span><span>Раздел <b>Прогресс</b> показывает вашу точность по каждому из шести падежей.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">2</span><span>Зелёная полоска — процент правильных ответов. Чем длиннее, тем лучше усвоен падеж.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">3</span><span>Ниже — лента последних попыток: зелёный кружок = правильно, красный = ошибка.</span></div>
+          <div class="ref-howto-tip">💡 Статистика накапливается автоматически из тренажёра. Чем больше занимаетесь — тем точнее картина.</div>
+        </div>
+
+        <div class="ref-howto-panel" id="howto-ref" style="display:none">
+          <div class="ref-howto-step"><span class="ref-howto-num">1</span><span>В этом разделе собраны <b>все грамматические таблицы</b>: гармония гласных, падежи, аффиксы, числа, местоимения.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">2</span><span>Блок <b>«Как понимать падежи»</b> объясняет логику через три роли: кто действует, на что направлено, к кому направлено.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">3</span><span>Блок <b>«Магазин»</b> содержит готовые фразы bu/bunu/buna с разбором формы alabilir miyim.</span></div>
+          <div class="ref-howto-tip">💡 Используйте Справку как шпаргалку во время тренировки — она всегда в одном тапе.</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Гармония гласных -->
     <div>
       <div class="section-title">Гармония гласных</div>
