@@ -606,17 +606,21 @@ function renderTrainer() {
   // Card border color
   $('question-card').style.borderColor = cas.color;
 
-  // Cheatsheet
+  // Cheatsheet — формы скрыты, раскрываются по нажатию
   const cs = $('cheatsheet-grid');
   cs.innerHTML = '';
   CASES.forEach(c => {
     const r = buildCase(s.word.w, c.id);
     const el = document.createElement('div');
-    el.className = 'cheat-item' + (c.id === cas.id ? ' cheat-active' : '');
+    el.className = 'cheat-item cheat-hidden' + (c.id === cas.id ? ' cheat-active' : '');
     el.style.borderColor = c.id === cas.id ? c.color : 'transparent';
     el.innerHTML = `<span class="cheat-case" style="background:${c.color}">${c.ru.slice(0,3)}.</span>
       <span class="cheat-form">${r.form}</span>
-      <span class="cheat-suf">${r.suffix}</span>`;
+      <span class="cheat-suf">${r.suffix}</span>
+      <span class="cheat-tap">нажми</span>`;
+    el.addEventListener('click', () => {
+      el.classList.toggle('cheat-hidden');
+    });
     cs.appendChild(el);
   });
 
@@ -849,6 +853,52 @@ function normalizeTr(s) {
     .replace(/\s+/g, ' ');
 }
 
+
+// ─── PRONOUN DETECTION ────────────────────────────────────────────────────────
+function detectPronoun(tr) {
+  const t = tr.toLowerCase();
+  // Explicit pronoun in text
+  if (/\bben\b/.test(t))   return 'ben (я)';
+  if (/\bsen\b/.test(t))   return 'sen (ты)';
+  if (/\bbiz\b/.test(t))   return 'biz (мы)';
+  if (/\bsiz\b/.test(t))   return 'siz (вы)';
+  if (/\bonlar\b/.test(t)) return 'onlar (они)';
+  // Personal verb endings (present continuous -yor, aorist, future etc.)
+  if (/(?:yor|[aeıiuü]r|[aeıiuü]c[aeıiuü][kğ])um\b/.test(t)) return 'ben (я)';
+  if (/(?:yor|[aeıiuü]r|[aeıiuü]c[aeıiuü][kğ])sun\b/.test(t)) return 'sen (ты)';
+  if (/(?:yor|[aeıiuü]r|[aeıiuü]c[aeıiuü][kğ])uz\b/.test(t)) return 'biz (мы)';
+  if (/(?:yor|[aeıiuü]r|[aeıiuü]c[aeıiuü][kğ])sunuz\b/.test(t)) return 'siz (вы)';
+  if (/(?:yor|[aeıiuü]r|[aeıiuü]c[aeıiuü][kğ])lar\b/.test(t)) return 'onlar (они)';
+  // -iyorum, -ıyorsun etc.
+  if (/[iıuü]yorum\b/.test(t)) return 'ben (я)';
+  if (/[iıuü]yorsun\b/.test(t)) return 'sen (ты)';
+  if (/[iıuü]yoruz\b/.test(t)) return 'biz (мы)';
+  if (/[iıuü]yorsunuz\b/.test(t)) return 'siz (вы)';
+  if (/[iıuü]yorlar\b/.test(t)) return 'onlar (они)';
+  // -dim/-din (past)
+  if (/d[iıuü]m\b/.test(t)) return 'ben (я)';
+  if (/d[iıuü]n\b/.test(t)) return 'sen (ты)';
+  if (/d[iıuü]k\b/.test(t)) return 'biz (мы)';
+  if (/d[iıuü]n[iıuü]z\b/.test(t)) return 'siz (вы)';
+  // miyim / misin / miyiz / misiniz
+  if (/m[iıuü]y[iıuü]m\b/.test(t)) return 'ben (я)';
+  if (/m[iıuü]s[iıuü]n\b/.test(t) && !/m[iıuü]s[iıuü]n[iıuü]z\b/.test(t)) return 'sen (ты)';
+  if (/m[iıuü]y[iıuü]z\b/.test(t)) return 'biz (мы)';
+  if (/m[iıuü]s[iıuü]n[iıuü]z\b/.test(t)) return 'siz (вы)';
+  // istiyorum etc.
+  if (/[iı]stiyorum\b/.test(t)) return 'ben (я)';
+  if (/[iı]stiyorsun\b/.test(t)) return 'sen (ты)';
+  if (/[iı]stiyoruz\b/.test(t)) return 'biz (мы)';
+  // -bilir miyim
+  if (/bil[iı]r m[iıuü]y[iıuü]m\b/.test(t)) return 'ben (я)';
+  if (/bil[iı]r m[iıuü]s[iıuü]n[iıuü]z\b/.test(t)) return 'siz (вы)';
+  // 3rd person (no ending) after -yor / -ıyor
+  if (/[iıuü]yor\b/.test(t)) return 'o (он/она)';
+  // Explicit o (he/she) — only if standalone word
+  if (/\bo\b/.test(t) && t.split(' ').length <= 5) return 'o (он/она)';
+  return null;
+}
+
 function renderSentences() {
   if (!sentState.current) sentState.current = pickSentence();
   const s = sentState.current;
@@ -858,6 +908,21 @@ function renderSentences() {
   $('sent-hint').textContent = s.hint;
   $('sent-hint').style.display = 'none';
   $('btn-sent-hint').style.display = '';
+
+  // Pronoun hint
+  const sentPron = detectPronoun(s.tr);
+  const sentPronEl = $('sent-pronoun');
+  const sentPronBtn = $('btn-sent-pronoun');
+  if (sentPronEl && sentPronBtn) {
+    if (sentPron) {
+      sentPronBtn.style.display = '';
+      sentPronEl.textContent = sentPron;
+      sentPronEl.style.display = 'none';
+    } else {
+      sentPronBtn.style.display = 'none';
+      sentPronEl.style.display = 'none';
+    }
+  }
 
   const acc = sentState.session.total > 0
     ? Math.round(sentState.session.right / sentState.session.total * 100) : null;
@@ -936,6 +1001,12 @@ function initSentences() {
     $('sent-hint').style.display = '';
     $('btn-sent-hint').style.display = 'none';
   });
+  if ($('btn-sent-pronoun')) {
+    $('btn-sent-pronoun').addEventListener('click', () => {
+      $('sent-pronoun').style.display = '';
+      $('btn-sent-pronoun').style.display = 'none';
+    });
+  }
   $('sent-answer').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       if (sentState.phase === 'q') checkSentAnswer();
@@ -1334,6 +1405,34 @@ function renderDialogs() {
   $('dlg-hint').style.display = 'none';
   $('btn-dlg-hint').style.display = '';
 
+  // Pronoun hints for dialog
+  const dlgPronQ = detectPronoun(d.q_tr);
+  const dlgPronA = detectPronoun(d.a_tr);
+  const dlgPronBtnQ = $('btn-dlg-pronoun-q');
+  const dlgPronElQ = $('dlg-pronoun-q');
+  const dlgPronBtnA = $('btn-dlg-pronoun-a');
+  const dlgPronElA = $('dlg-pronoun-a');
+  if (dlgPronBtnQ && dlgPronElQ) {
+    if (dlgPronQ) {
+      dlgPronBtnQ.style.display = '';
+      dlgPronElQ.textContent = dlgPronQ;
+      dlgPronElQ.style.display = 'none';
+    } else {
+      dlgPronBtnQ.style.display = 'none';
+      dlgPronElQ.style.display = 'none';
+    }
+  }
+  if (dlgPronBtnA && dlgPronElA) {
+    if (dlgPronA) {
+      dlgPronBtnA.style.display = '';
+      dlgPronElA.textContent = dlgPronA;
+      dlgPronElA.style.display = 'none';
+    } else {
+      dlgPronBtnA.style.display = 'none';
+      dlgPronElA.style.display = 'none';
+    }
+  }
+
   // Stats
   const acc = dlgState.session.total > 0
     ? Math.round(dlgState.session.right / dlgState.session.total * 100) : null;
@@ -1421,6 +1520,18 @@ function initDialogs() {
     $('dlg-hint').style.display = '';
     $('btn-dlg-hint').style.display = 'none';
   });
+  if ($('btn-dlg-pronoun-q')) {
+    $('btn-dlg-pronoun-q').addEventListener('click', () => {
+      $('dlg-pronoun-q').style.display = '';
+      $('btn-dlg-pronoun-q').style.display = 'none';
+    });
+  }
+  if ($('btn-dlg-pronoun-a')) {
+    $('btn-dlg-pronoun-a').addEventListener('click', () => {
+      $('dlg-pronoun-a').style.display = '';
+      $('btn-dlg-pronoun-a').style.display = 'none';
+    });
+  }
   $('dlg-answer').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       if (dlgState.phase === 'q') checkDlgAnswer();

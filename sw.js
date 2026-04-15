@@ -1,4 +1,4 @@
-const CACHE = 'turkce-v11';
+const CACHE = 'turkce-v12';
 const ASSETS = ['/', '/index.html', '/app.js', '/style.css', '/manifest.json'];
 
 self.addEventListener('install', e => {
