@@ -682,6 +682,11 @@ function nextQuestion() {
   state.word = q.word; state.cas = q.cas;
   state.phase = 'q'; state.correct = false;
   $('answer-input').value = '';
+  // Сбрасываем cheatsheet
+  const cb = document.getElementById('cheat-body');
+  const cbtn = document.getElementById('btn-cheat');
+  if (cb) cb.style.display = 'none';
+  if (cbtn) cbtn.textContent = '💡 Показать все формы';
   render();
   setTimeout(() => $('answer-input').focus(), 80);
 }
@@ -1431,4 +1436,14 @@ function showHowto(id, btn) {
   const panel = document.getElementById('howto-' + id);
   if (panel) panel.style.display = '';
   if (btn) btn.classList.add('active');
+}
+
+// ─── CHEAT TOGGLE ─────────────────────────────────────────────────────────────
+function toggleCheat() {
+  const body = document.getElementById('cheat-body');
+  const btn  = document.getElementById('btn-cheat');
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : '';
+  btn.textContent = open ? '💡 Показать все формы' : '🙈 Скрыть формы';
 }

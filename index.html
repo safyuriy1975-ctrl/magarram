@@ -89,8 +89,11 @@
 
     <!-- Cheatsheet -->
     <div class="cheatsheet">
-      <div class="cheat-title">Все формы этого слова</div>
-      <div class="cheatsheet-grid" id="cheatsheet-grid"></div>
+      <button class="cheat-toggle-btn" id="btn-cheat" onclick="toggleCheat()">💡 Показать все формы</button>
+      <div id="cheat-body" style="display:none">
+        <div class="cheat-title">Все формы этого слова</div>
+        <div class="cheatsheet-grid" id="cheatsheet-grid"></div>
+      </div>
     </div>
 
   </div><!-- /trainer -->
@@ -543,19 +546,37 @@
 
     <!-- Вопрос mı/mi -->
     <div class="ref-insight">
-      <div class="ref-insight-title">❓ Вопросительная частица mı/mi</div>
+      <div class="ref-insight-title">❓ Вопросительные частицы mı / mi / mu / mü</div>
       <div class="ref-insight-body">
-        Пишется <b>отдельно</b> после слова, подчиняется гармонии гласных:
-        <table class="ref-min-table" style="margin-top:8px">
-          <tr><td>После а, ı</td><td><b>mı</b></td><td><i>Anne avukat <b>mı</b>?</i></td></tr>
-          <tr><td>После e, i</td><td><b>mi</b></td><td><i>Araba burada <b>mı</b>?</i></td></tr>
-          <tr><td>После o, u</td><td><b>mu</b></td><td><i>Doktor burada <b>mu</b>?</i></td></tr>
-          <tr><td>После ö, ü</td><td><b>mü</b></td><td><i>Ev güzel <b>mü</b>?</i></td></tr>
+
+        <div class="ref-insight-tip" style="margin-bottom:10px;border-left-color:#63b3ed;background:rgba(99,179,237,.08);color:#bee3f8">
+          В русском уточняющий вопрос («да/нет?») строится <b>интонацией</b>.<br>
+          В турецком — частицей <b>mı/mi/mu/mü</b>, которая пишется отдельно и подчиняется гармонии гласных.
+        </div>
+
+        <table class="ref-min-table">
+          <thead><tr><th>Гласные слова</th><th>Частица</th><th>Пример</th></tr></thead>
+          <tr><td>Мягкие: <b style="color:#fc8181">e, i</b></td><td><b>mi</b></td><td><i>Bu senin <b>mi</b>? — Это твоё?</i></td></tr>
+          <tr><td>Мягкие: <b style="color:#fc8181">ö, ü</b></td><td><b>mü</b></td><td><i>Ev güzel <b>mü</b>?</i></td></tr>
+          <tr><td>Твёрдые: <b style="color:#f6ad55">a, ı</b></td><td><b>mı</b></td><td><i>Anne avukat <b>mı</b>?</i></td></tr>
+          <tr><td>Твёрдые: <b style="color:#f6ad55">o, u</b></td><td><b>mu</b></td><td><i>Doktor burada <b>mu</b>?</i></td></tr>
         </table>
-        <div class="ref-insight-tip" style="margin-top:8px">
-          Утвердительный ответ: <b>Evet</b> + повтор сказуемого.<br>
-          Отрицательный ответ: <b>Hayır, değil.</b> (нет, не является)<br>
-          <i>Anne avukat mı? — Evet, avukat. / Hayır, değil.</i>
+
+        <div style="margin-top:12px;font-size:13px;color:#cbd5e0">
+          <b>Прямые вопросы</b> — через вопросительные слова (kim, ne, nerede…):<br>
+          <div style="margin:4px 0 8px 8px;color:#a0aec0">
+            Bu <b>kim</b>? — Кто это? &nbsp;|&nbsp; Bu <b>kimin</b>? — Это чьё?<br>
+            Bu Lena <b>mı</b>? — Это Лена? &nbsp;|&nbsp; Bu senin <b>mi</b>? — Это твоё?
+          </div>
+          <b>Выбор из двух</b> — оба варианта с частицей, разделяются <b>yoksa / veya</b>:<br>
+          <div style="margin:4px 0 0 8px;color:#a0aec0">
+            Bu senin <b>mi</b> yoksa benim <b>mi</b>? — Это твоё или моё?
+          </div>
+        </div>
+
+        <div class="ref-insight-tip" style="margin-top:10px">
+          <b>Evet</b> + повтор: <i>Anne avukat mı? — Evet, avukat.</i><br>
+          <b>Hayır, değil</b>: <i>Hayır, avukat değil.</i> (değil = не является)
         </div>
       </div>
     </div>

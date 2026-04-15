@@ -814,3 +814,23 @@ input  { font: inherit; }
   color: #fbd38d;
   margin-top: 4px;
 }
+
+/* ── Cheat toggle button ──────────────────────────────── */
+.cheat-toggle-btn {
+  width: 100%;
+  background: rgba(255,255,255,.05);
+  border: 1.5px solid rgba(255,255,255,.12);
+  color: #a0aec0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  text-align: left;
+  margin-bottom: 6px;
+}
+.cheat-toggle-btn:active {
+  background: rgba(13,124,138,.2);
+  color: #81e6d9;
+}
