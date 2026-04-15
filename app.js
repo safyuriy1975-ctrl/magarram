@@ -905,7 +905,7 @@ function renderSentences() {
   if (!s) return;
 
   $('sent-ru').textContent = s.ru;
-  $('sent-hint').textContent = s.hint;
+  $('sent-hint').innerHTML = '<b style="font-size:15px">' + s.tr + '</b><span style="display:block;margin-top:4px;font-size:12px;opacity:.75">' + s.hint + '</span>';
   $('sent-hint').style.display = 'none';
   $('btn-sent-hint').style.display = '';
 
@@ -1401,7 +1401,7 @@ function renderDialogs() {
   // Question
   $('dlg-question').textContent = d.q_ru;
   $('dlg-question-tr').textContent = d.q_tr;
-  $('dlg-hint').textContent = d.hint;
+  $('dlg-hint').innerHTML = '<span style="font-size:11px;opacity:.6">Вопрос:</span> <b>' + d.q_tr + '</b><br><span style="font-size:11px;opacity:.6">Ответ:</span> <b>' + d.a_tr + '</b><span style="display:block;margin-top:4px;font-size:12px;opacity:.75">' + d.hint + '</span>';
   $('dlg-hint').style.display = 'none';
   $('btn-dlg-hint').style.display = '';
 
@@ -1474,7 +1474,7 @@ function checkDlgAnswer() {
   }
 
   $('dlg-res-correct').innerHTML = '<b>' + d.a_tr + '</b>';
-  $('dlg-res-hint').textContent = d.hint;
+  $('dlg-res-hint').innerHTML = '<span style="font-size:12px;opacity:.75">' + d.hint + '</span>';
   renderDialogs();
 }
 
@@ -1512,7 +1512,7 @@ function initDialogs() {
     $('dlg-res-verdict').className = 'res-verdict c-skip';
     $('dlg-res-your').style.display = 'none';
     $('dlg-res-correct').innerHTML = '<b>' + d.a_tr + '</b>';
-    $('dlg-res-hint').textContent = d.hint;
+    $('dlg-res-hint').innerHTML = '<span style="font-size:12px;opacity:.75">' + d.hint + '</span>';
     renderDialogs();
   });
   $('btn-dlg-next').addEventListener('click', nextDialog);
