@@ -683,6 +683,7 @@ function checkAnswer() {
   state.byCas[state.cas.id].t++;
   if (ok) state.byCas[state.cas.id].r++;
   saveState();
+    checkAchievements();
   render();
 }
 
@@ -811,10 +812,10 @@ document.addEventListener('DOMContentLoaded', () => {
       state.history = [];
       state.byCas   = {};
       saveState();
+     
       render();
     }
   });
-
   render();
 
   // SW
@@ -1606,4 +1607,217 @@ function toggleCheat() {
   const open = body.style.display !== 'none';
   body.style.display = open ? 'none' : '';
   btn.textContent = open ? '💡 Показать все формы' : '🙈 Скрыть формы';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FLASHCARD MODE
+// ═══════════════════════════════════════════════════════════════════════════
+let flashcardState = {
+  current: null,
+  flipped: false,
+  favorites: new Set(),
+  session: { total: 0, right: 0 }
+};
+
+function loadFavorites() {
+  try {
+    const saved = JSON.parse(LS.getItem('tc_favorites') || '[]');
+    flashcardState.favorites = new Set(saved);
+  } catch(e) {}
+}
+
+function saveFavorites() {
+  try {
+    LS.setItem('tc_favorites', JSON.stringify([...flashcardState.favorites]));
+  } catch(e){}
+}
+
+function toggleFavorite(word) {
+  if (flashcardState.favorites.has(word)) {
+    flashcardState.favorites.delete(word);
+    showToast('❌ Удалено из избранного');
+  } else {
+    flashcardState.favorites.add(word);
+    showToast('⭐ Добавлено в избранное!');
+  }
+  saveFavorites();
+  if (state.page === 'flashcard') renderFlashcard();
+}
+
+function pickFlashcard() {
+  const all = getFilteredWords();
+  if (!all.length) return null;
+  let w, tries = 0;
+  do {
+    w = all[Math.floor(Math.random() * all.length)];
+    tries++;
+  } while (tries < 20 && flashcardState.current && w.w === flashcardState.current.w);
+  return w;
+}
+
+function flipCard() {
+  flashcardState.flipped = !flashcardState.flipped;
+  const card = $('flashcard');
+  if (card) card.classList.toggle('flipped');
+}
+
+function markCorrect() {
+  flashcardState.session.total++;
+  flashcardState.session.right++;
+  flashcardState.current = pickFlashcard();
+  flashcardState.flipped = false;
+  renderFlashcard();
+  showToast('✅ Верно!');
+}
+
+function markWrong() {
+  flashcardState.session.total++;
+  flashcardState.current = pickFlashcard();
+  flashcardState.flipped = false;
+  renderFlashcard();
+  showToast('❌ Неверно');
+}
+
+function renderFlashcard() {
+  const w = flashcardState.current;
+  if (!w) return;
+  
+  const card = $('flashcard');
+  const isFav = flashcardState.favorites.has(w.w);
+  
+  card.className = 'flashcard-card' + (flashcardState.flipped ? ' flipped' : '');
+  card.innerHTML = `
+    <div class="fc-front">
+      <div class="fc-header">
+        <span class="fc-cat">${w.cat}</span>
+        <button class="fc-fav-btn" onclick="toggleFavorite('${w.w}')">${isFav ? '❤️' : '🤍'}</button>
+      </div>
+      <div class="fc-word">${w.ru}</div>
+      <div class="fc-hint">Нажмите, чтобы перевернуть</div>
+    </div>
+    <div class="fc-back">
+      <div class="fc-tr">${w.w}</div>
+      <div class="fc-forms">
+        ${CASES.map(c => {
+          const r = buildCase(w.w, c.id);
+          return `<div class="fc-form"><span class="fc-case">${c.ru}:</span> ${r.form}</div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  
+  const acc = flashcardState.session.total > 0 ? Math.round(flashcardState.session.right / flashcardState.session.total * 100) : 0;
+  $('fc-total').textContent = flashcardState.session.total;
+  $('fc-right').textContent = flashcardState.session.right;
+  $('fc-acc').textContent = acc + '%';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TIMER MODE
+// ═══════════════════════════════════════════════════════════════════════════
+let timerState = {
+  running: false,
+  timeLeft: 60,
+  score: 0,
+  total: 0,
+  currentQuestion: null,
+  interval: null
+};
+
+function startTimer() {
+  timerState.running = true;
+  timerState.timeLeft = 60;
+  timerState.score = 0;
+  timerState.total = 0;
+  timerState.currentQuestion = pickQuestion(null);
+  renderTimer();
+  
+  timerState.interval = setInterval(() => {
+    timerState.timeLeft--;
+    if (timerState.timeLeft <= 0) {
+      endTimer();
+    }
+    renderTimer();
+  }, 1000);
+}
+
+function endTimer() {
+  clearInterval(timerState.interval);
+  timerState.running = false;
+  renderTimer();
+  const acc = timerState.total > 0 ? Math.round(timerState.score / timerState.total * 100) : 0;
+  showToast(`⏱️ Время вышло! ${timerState.score}/${timerState.total} (${acc}%)`);
+}
+
+function checkTimerAnswer() {
+  const input = $('timer-answer').value.trim().toLowerCase();
+  if (!input) return;
+  
+  const result = buildCase(timerState.currentQuestion.word.w, timerState.currentQuestion.cas.id);
+  const isRight = input === result.form.toLowerCase();
+  
+  timerState.total++;
+  if (isRight) timerState.score++;
+  
+  timerState.currentQuestion = pickQuestion(timerState.currentQuestion);
+  $('timer-answer').value = '';
+  renderTimer();
+  
+  if (isRight) showToast('✅');
+  else showToast('❌');
+}
+
+function renderTimer() {
+  if (!timerState.currentQuestion) return;
+  
+  const q = timerState.currentQuestion;
+  $('timer-time').textContent = timerState.timeLeft + 's';
+  $('timer-score').textContent = `${timerState.score}/${timerState.total}`;
+  $('timer-word-ru').textContent = q.word.ru;
+  $('timer-word-tr').textContent = q.word.w;
+  $('timer-case-name').textContent = q.cas.ru;
+  
+  if (!timerState.running) {
+    $('timer-input-area').style.display = 'none';
+    $('timer-result-area').style.display = '';
+    const acc = timerState.total > 0 ? Math.round(timerState.score / timerState.total * 100) : 0;
+    $('timer-final-score').textContent = `${timerState.score}/${timerState.total} (${acc}%)`;
+  } else {
+    $('timer-input-area').style.display = '';
+    $('timer-result-area').style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TOAST NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════════════════
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => toast.classList.add('show'), 100);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ACHIEVEMENTS
+// ═══════════════════════════════════════════════════════════════════════════
+function checkAchievements() {
+  const s = state.session;
+  
+  if (s.streak === 5) showToast('🔥 Серия из 5!');
+  if (s.streak === 10) showToast('🔥🔥 Серия из 10!');
+  if (s.streak === 20) showToast('🔥🔥🔥 Невероятная серия из 20!');
+  
+  if (s.total === 10) showToast('🎯 Первые 10 попыток!');
+  if (s.total === 50) showToast('🎯 50 попыток!');
+  if (s.total === 100) showToast('🏆 100 попыток! Ты мастер!');
+  
+  const acc = s.total > 0 ? Math.round(s.right / s.total * 100) : 0;
+  if (s.total >= 20 && acc >= 90) showToast('⭐ Точность 90%+!');
 }
