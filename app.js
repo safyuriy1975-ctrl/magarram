@@ -22,6 +22,33 @@ function highlightSentenceAffixes(text){
 }
 'use strict';
 
+// ============================================================
+// PAGE NAVIGATION
+// ============================================================
+
+function showPage(pageId) {
+  // Hide all pages
+  const pages = ['page-trainer', 'page-stats', 'page-sent', 'page-flashcard', 'page-timer', 'page-words', 'page-ref'];
+  pages.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  
+  // Show selected page
+  const targetPage = document.getElementById(pageId);
+  if (targetPage) targetPage.style.display = 'block';
+  
+  // Update nav buttons
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.removeAttribute('aria-current');
+  });
+  
+  const activeBtn = document.querySelector(`[data-page="${pageId}"]`);
+  if (activeBtn) {
+    activeBtn.setAttribute('aria-current', 'true');
+  }
+}
+
 // ─── VOWEL HARMONY ────────────────────────────────────────────────────────────
 const VOWELS = new Set(['a','e','ı','i','o','ö','u','ü']);
 const BACK   = new Set(['a','ı','o','u']);
@@ -817,6 +844,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   render();
+
+    // Navigation buttons
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const pageId = btn.getAttribute('data-page');
+      if (pageId) showPage(pageId);
+    });
+  });
 
   // SW
   if ('serviceWorker' in navigator)
