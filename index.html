@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0d7c8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Türkçe">
+  <meta name="description" content="Тренажёр турецких падежей с гармонией гласных">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/icon-192.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <title>Mağaram</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="logo">M</div>
+    <div>
+      <div class="app-title">Mağaram</div>
+      <div class="app-sub">Турецкие падежи</div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ TRAINER ═══════════════ -->
+  <div id="page-trainer" class="page">
+
+    <!-- Category filter -->
+    <div class="cat-filter" id="cat-filter"></div>
+
+    <!-- Session bar -->
+    <div class="session-bar">
+      <div class="s-stat"><span class="s-num" id="s-total">0</span><span class="s-lbl">вопросов</span></div>
+      <div class="s-stat"><span class="s-num c-ok" id="s-right">0</span><span class="s-lbl">верно</span></div>
+      <div class="s-stat"><span class="s-num" id="s-acc">—</span><span class="s-lbl">точность</span></div>
+      <span id="s-streak" class="streak"></span>
+    </div>
+
+    <!-- Question card -->
+    <div class="question-card" id="question-card">
+      <div class="case-badge-row">
+        <span class="case-badge" id="case-badge">—</span>
+        <span class="case-q" id="case-q"></span>
+      </div>
+
+      <div class="word-display">
+        <span class="word-tr" id="word-tr"></span>
+        <span class="word-ru" id="word-ru"></span>
+        <span class="word-cat" id="word-cat"></span>
+      </div>
+
+      <p class="task-prompt" id="task-prompt"></p>
+
+      <!-- Input phase -->
+      <div class="input-area" id="input-area">
+        <input type="text" id="answer-input" class="answer-input"
+          placeholder="Введите турецкую форму…"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-check">Проверить</button>
+          <button class="btn btn-ghost" id="btn-skip">Пропустить</button>
+        </div>
+      </div>
+
+      <!-- Result phase -->
+      <div class="result-area" id="result-area" style="display:none">
+        <div class="res-top">
+          <span class="res-icon" id="res-icon"></span>
+          <div>
+            <div class="res-verdict" id="res-verdict"></div>
+            <div class="res-your" id="res-your" style="display:none"></div>
+            <div class="res-correct" id="res-correct"></div>
+          </div>
+        </div>
+        <div class="rule-box" id="res-rule"></div>
+        <button class="btn btn-primary btn-full" id="btn-next">Следующее слово →</button>
+      </div>
+    </div>
+
+    <!-- Cheatsheet -->
+    <div class="cheatsheet">
+      <button class="cheat-toggle-btn" id="btn-cheat" onclick="toggleCheat()">💡 Показать все формы</button>
+      <div id="cheat-body" style="display:none">
+        <div class="cheat-title">Все формы этого слова</div>
+        <div class="cheatsheet-grid" id="cheatsheet-grid"></div>
+      </div>
+    </div>
+
+  </div><!-- /trainer -->
+
+  <!-- ═══════════════ STATS ═══════════════ -->
+  <div id="page-stats" class="page">
+    <div class="page-title">Прогресс</div>
+
+    <div class="summary-grid">
+      <div class="sum-card"><span class="sum-num" id="st-total">0</span><span class="sum-lbl">Попыток</span></div>
+      <div class="sum-card"><span class="sum-num c-ok" id="st-right">0</span><span class="sum-lbl">Верно</span></div>
+      <div class="sum-card"><span class="sum-num" id="st-acc">0%</span><span class="sum-lbl">Точность</span></div>
+    </div>
+
+    <div>
+      <div class="section-title">По падежам</div>
+      <div class="case-bars" id="case-bars"></div>
+    </div>
+
+    <div>
+      <div class="section-title">Последние попытки</div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+    <button class="btn btn-danger btn-full" id="btn-reset">Сбросить прогресс</button>
+  </div>
+
+  <!-- ═══════════════ REFERENCE ═══════════════ -->
+  <div id="page-ref" class="page">
+    <div class="page-title">Справочник</div>
+
+    <!-- Инструкция -->
+    <div class="ref-insight" id="ref-howto">
+      <div class="ref-insight-title">📱 Как пользоваться приложением</div>
+      <div class="ref-insight-body">
+        <div class="ref-howto-tabs">
+          <button class="ref-howto-tab active" onclick="showHowto('trainer',this)">✏️ Тренажёр</button>
+          <button class="ref-howto-tab" onclick="showHowto('sent',this)">💬 Фразы</button>
+          <button class="ref-howto-tab" onclick="showHowto('words',this)">➕ Слова</button>
+          <button class="ref-howto-tab" onclick="showHowto('stats',this)">📊 Прогресс</button>
+          <button class="ref-howto-tab" onclick="showHowto('ref',this)">📖 Справка</button>
+        </div>
+
+        <div class="ref-howto-panel" id="howto-trainer">
+          <div class="ref-howto-step"><span class="ref-howto-num">1</span><span>Выберите <b>категорию слов</b> в горизонтальной полоске вверху (Все, Еда, Животные, Числа…). Можно листать.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">2</span><span>Появится слово на русском и <b>падеж</b>, который нужно применить.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">3</span><span>Введите форму слова на турецком и нажмите <b>Проверить</b> или клавишу Enter.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">4</span><span>Приложение покажет, правильно ли, и отобразит правильный ответ с подсказкой.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">5</span><span>Нажмите <b>Далее</b> для следующего слова. Карточка с результатом также переключается по Enter.</span></div>
+          <div class="ref-howto-tip">💡 Статус сессии (количество попыток и точность) виден в полоске над карточкой.</div>
+        </div>
+
+        <div class="ref-howto-panel" id="howto-sent" style="display:none">
+          <div class="ref-howto-step"><span class="ref-howto-num">1</span><span>Вкладка делится на два режима: <b>Фразы</b> и <b>Диалоги</b> — переключайте кнопками вверху.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">2</span><span><b>Фразы:</b> выберите уровень (Все / Простые / Средние). Читайте русское предложение, переводите на турецкий.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">3</span><span>После проверки показывается правильный перевод и <b>подсказка</b> о падежах.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">4</span><span><b>Диалоги:</b> выберите тему (Отель, Кафе, Магазин, Аренда…). Отвечайте на турецкий вопрос на турецком.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">5</span><span>Диалоги имитируют живые разговоры — полезно для подготовки к реальным ситуациям.</span></div>
+          <div class="ref-howto-tip">💡 Регистр букв не важен — приложение принимает ответы без учёта заглавных букв.</div>
+        </div>
+
+        <div class="ref-howto-panel" id="howto-words" style="display:none">
+          <div class="ref-howto-step"><span class="ref-howto-num">1</span><span>Здесь можно добавить <b>своё слово</b>: введите турецкий вариант, русский перевод и выберите категорию.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">2</span><span>Свои слова автоматически <b>попадают в тренажёр</b> вместе со стандартными словами.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">3</span><span>Добавленные слова хранятся в памяти устройства и не исчезают при перезагрузке.</span></div>
+          <div class="ref-howto-tip">💡 Чтобы тренировать только свои слова — выберите в тренажёре категорию, которую вы указали.</div>
+        </div>
+
+        <div class="ref-howto-panel" id="howto-stats" style="display:none">
+          <div class="ref-howto-step"><span class="ref-howto-num">1</span><span>Раздел <b>Прогресс</b> показывает вашу точность по каждому из шести падежей.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">2</span><span>Зелёная полоска — процент правильных ответов. Чем длиннее, тем лучше усвоен падеж.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">3</span><span>Ниже — лента последних попыток: зелёный кружок = правильно, красный = ошибка.</span></div>
+          <div class="ref-howto-tip">💡 Статистика накапливается автоматически из тренажёра. Чем больше занимаетесь — тем точнее картина.</div>
+        </div>
+
+        <div class="ref-howto-panel" id="howto-ref" style="display:none">
+          <div class="ref-howto-step"><span class="ref-howto-num">1</span><span>В этом разделе собраны <b>все грамматические таблицы</b>: гармония гласных, падежи, аффиксы, числа, местоимения.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">2</span><span>Блок <b>«Как понимать падежи»</b> объясняет логику через три роли: кто действует, на что направлено, к кому направлено.</span></div>
+          <div class="ref-howto-step"><span class="ref-howto-num">3</span><span>Блок <b>«Магазин»</b> содержит готовые фразы bu/bunu/buna с разбором формы alabilir miyim.</span></div>
+          <div class="ref-howto-tip">💡 Используйте Справку как шпаргалку во время тренировки — она всегда в одном тапе.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Гармония гласных -->
+    <div>
+      <div class="section-title">Гармония гласных</div>
+      <div class="vowel-grid">
+        <div class="vowel-box" style="border-color:#E74C3C;background:rgba(231,76,60,.1)">
+          <div class="vowel-box-title" style="color:#E74C3C">Задние нескруглённые</div>
+          <div class="vowel-pills">
+            <span class="vpill" style="background:#E74C3C">a</span>
+            <span class="vpill" style="background:#E74C3C">ı</span>
+          </div>
+        </div>
+        <div class="vowel-box" style="border-color:#2980B9;background:rgba(41,128,185,.1)">
+          <div class="vowel-box-title" style="color:#2980B9">Передние нескруглённые</div>
+          <div class="vowel-pills">
+            <span class="vpill" style="background:#2980B9">e</span>
+            <span class="vpill" style="background:#2980B9">i</span>
+          </div>
+        </div>
+        <div class="vowel-box" style="border-color:#27AE60;background:rgba(39,174,96,.1)">
+          <div class="vowel-box-title" style="color:#27AE60">Задние скруглённые</div>
+          <div class="vowel-pills">
+            <span class="vpill" style="background:#27AE60">o</span>
+            <span class="vpill" style="background:#27AE60">u</span>
+          </div>
+        </div>
+        <div class="vowel-box" style="border-color:#8E44AD;background:rgba(142,68,173,.1)">
+          <div class="vowel-box-title" style="color:#8E44AD">Передние скруглённые</div>
+          <div class="vowel-pills">
+            <span class="vpill" style="background:#8E44AD">ö</span>
+            <span class="vpill" style="background:#8E44AD">ü</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Как понимать падежи -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">💡 Как понимать падежи</div>
+      <div class="ref-insight-body">
+        В турецком главное — не искать «русские падежи», а научиться видеть <b>три роли</b>:
+        <div class="ref-roles">
+          <div class="ref-role" style="border-color:#2B5BD7">
+            <span class="ref-role-icon" style="background:#2B5BD7">①</span>
+            <span><b>Кто действует</b> — именительный (без суффикса)</span>
+          </div>
+          <div class="ref-role" style="border-color:#C0392B">
+            <span class="ref-role-icon" style="background:#C0392B">②</span>
+            <span><b>На что направлено действие</b> — винительный <span class="ref-suf-chip">-(y)ı/i/u/ü</span></span>
+          </div>
+          <div class="ref-role" style="border-color:#1E8449">
+            <span class="ref-role-icon" style="background:#1E8449">③</span>
+            <span><b>К кому/чему направлено</b> — дательный, местный, исходный</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-insight-title" style="margin-top:14px">📌 Минимальный набор</div>
+      <div class="ref-insight-body">
+        Четыре падежа перекрывают большинство ситуаций:
+        <table class="ref-min-table">
+          <tr>
+            <td><span class="rmt-badge" style="background:#2B5BD7">Именительный</span></td>
+            <td class="rmt-suf">—</td>
+            <td class="rmt-q">Кто? Что?</td>
+            <td class="rmt-note">Подлежащее, начальная форма</td>
+          </tr>
+          <tr>
+            <td><span class="rmt-badge" style="background:#7B2FBE">Родительный</span></td>
+            <td class="rmt-suf">-ın/in/un/ün</td>
+            <td class="rmt-q">Кого? Чего?</td>
+            <td class="rmt-note">Принадлежность: <i>ev<b>in</b> kapısı</i></td>
+          </tr>
+          <tr>
+            <td><span class="rmt-badge" style="background:#1E8449">Дательный</span></td>
+            <td class="rmt-suf">-a/e</td>
+            <td class="rmt-q">Кому? Куда?</td>
+            <td class="rmt-note">Направление: <i>okul<b>a</b> gidiyorum</i></td>
+          </tr>
+          <tr>
+            <td><span class="rmt-badge" style="background:#C0392B">Винительный</span></td>
+            <td class="rmt-suf">-ı/i/u/ü</td>
+            <td class="rmt-q">Кого? Что?</td>
+            <td class="rmt-note">Определённый объект: <i>kita<b>bı</b> okudum</i></td>
+          </tr>
+        </table>
+        <div class="ref-insight-tip">Местный (-da/-de) и исходный (-dan/-den) дополняют картину: <b>где</b> и <b>откуда</b>.</div>
+      </div>
+    </div>
+
+    <!-- Падежи -->
+    <div>
+      <div class="section-title">Падежи</div>
+      <div class="case-cards-ref">
+        <div class="ref-card" style="border-color:#2B5BD7">
+          <div class="ref-card-name" style="color:#2B5BD7">Именительный</div>
+          <div class="ref-card-tr">Yalın</div>
+          <div class="ref-card-suf">—</div>
+          <div class="ref-card-q">Кто? Что?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">kedi → <b>kedi</b></span>
+            <span class="ref-ex">ev → <b>ev</b></span>
+          </div>
+        </div>
+        <div class="ref-card" style="border-color:#7B2FBE">
+          <div class="ref-card-name" style="color:#7B2FBE">Родительный</div>
+          <div class="ref-card-tr">Tamlayan</div>
+          <div class="ref-card-suf">-(n)ın/in/un/ün</div>
+          <div class="ref-card-q">Чего? Кого?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">kedi → <b>kedinin</b></span>
+            <span class="ref-ex">araba → <b>arabanın</b></span>
+          </div>
+        </div>
+        <div class="ref-card" style="border-color:#C0392B">
+          <div class="ref-card-name" style="color:#C0392B">Винительный</div>
+          <div class="ref-card-tr">Belirtme</div>
+          <div class="ref-card-suf">-(y)ı/i/u/ü</div>
+          <div class="ref-card-q">Кого? Что?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">kedi → <b>kediyi</b></span>
+            <span class="ref-ex">kitap → <b>kitabı</b></span>
+          </div>
+        </div>
+        <div class="ref-card" style="border-color:#1E8449">
+          <div class="ref-card-name" style="color:#1E8449">Дательный</div>
+          <div class="ref-card-tr">Yönelme</div>
+          <div class="ref-card-suf">-(y)a/e</div>
+          <div class="ref-card-q">Кому? Куда?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">ev → <b>eve</b></span>
+            <span class="ref-ex">okul → <b>okula</b></span>
+          </div>
+        </div>
+        <div class="ref-card" style="border-color:#B7770D">
+          <div class="ref-card-name" style="color:#B7770D">Местный</div>
+          <div class="ref-card-tr">Bulunma</div>
+          <div class="ref-card-suf">-da/de/ta/te</div>
+          <div class="ref-card-q">Где?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">ev → <b>evde</b></span>
+            <span class="ref-ex">okul → <b>okulda</b></span>
+          </div>
+        </div>
+        <div class="ref-card" style="border-color:#1A7A8A">
+          <div class="ref-card-name" style="color:#1A7A8A">Исходный</div>
+          <div class="ref-card-tr">Uzaklaşma</div>
+          <div class="ref-card-suf">-dan/den/tan/ten</div>
+          <div class="ref-card-q">Откуда?</div>
+          <div class="ref-card-ex">
+            <span class="ref-ex">ev → <b>evden</b></span>
+            <span class="ref-ex">okul → <b>okuldan</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Таблица -->
+    <div>
+      <div class="section-title">Аффиксы по гласным</div>
+      <table class="harmony-table">
+        <thead>
+          <tr>
+            <th>Гласная</th><th style="color:#7B2FBE">Род.</th>
+            <th style="color:#C0392B">Вин.</th><th style="color:#1E8449">Дат.</th>
+            <th style="color:#B7770D">Мест.</th><th style="color:#1A7A8A">Исх.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="ht-vowel" style="color:#E74C3C">a</td><td>-nın</td><td>-yı</td><td>-ya</td><td>-da</td><td>-dan</td></tr>
+          <tr><td class="ht-vowel" style="color:#E74C3C">ı</td><td>-nın</td><td>-yı</td><td>-ya</td><td>-da</td><td>-dan</td></tr>
+          <tr><td class="ht-vowel" style="color:#2980B9">e</td><td>-nin</td><td>-yi</td><td>-ye</td><td>-de</td><td>-den</td></tr>
+          <tr><td class="ht-vowel" style="color:#2980B9">i</td><td>-nin</td><td>-yi</td><td>-ye</td><td>-de</td><td>-den</td></tr>
+          <tr><td class="ht-vowel" style="color:#27AE60">o</td><td>-nun</td><td>-yu</td><td>-ya</td><td>-da</td><td>-dan</td></tr>
+          <tr><td class="ht-vowel" style="color:#27AE60">u</td><td>-nun</td><td>-yu</td><td>-ya</td><td>-da</td><td>-dan</td></tr>
+          <tr><td class="ht-vowel" style="color:#8E44AD">ö</td><td>-nün</td><td>-yü</td><td>-ye</td><td>-de</td><td>-den</td></tr>
+          <tr><td class="ht-vowel" style="color:#8E44AD">ü</td><td>-nün</td><td>-yü</td><td>-ye</td><td>-de</td><td>-den</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px;color:#5a5a7a;margin-top:6px">* Буфер н/й добавляется если основа на гласную</p>
+    </div>
+
+    <!-- Буферные -->
+    <div>
+      <div class="section-title">Буферные согласные и озвончение</div>
+      <div class="buf-grid">
+        <div class="buf-item">
+          <div class="buf-rule">Основа на гласную + Вин./Дат. → буфер Й</div>
+          <div class="buf-ex">araba → arabay<b>a</b> | kedi → kediy<b>e</b></div>
+        </div>
+        <div class="buf-item">
+          <div class="buf-rule">Основа на гласную + Род. → буфер Н</div>
+          <div class="buf-ex">kedi → kedi<b>n</b>in | araba → araba<b>n</b>ın</div>
+        </div>
+        <div class="buf-item">
+          <div class="buf-rule">Озвончение: ç→c, p→b, t→d</div>
+          <div class="buf-ex">kitap → kita<b>b</b>a | ağaç → ağa<b>c</b>a</div>
+        </div>
+        <div class="buf-item" style="border-left-color:#B7770D">
+          <div class="buf-rule">После глухих (ç,f,h,k,p,s,ş,t) → т вместо д</div>
+          <div class="buf-ex">kitap → kita<b>p</b>ta | sepet → sepe<b>t</b>te</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Алгоритм подстановки -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">🧠 Как подставить правильный падеж</div>
+      <div class="ref-insight-body">
+        Действуйте как алгоритм:
+        <div class="ref-algo">
+          <div class="ref-algo-step">
+            <span class="ref-algo-num">1</span>
+            <span>Найдите <b>сказуемое</b> (глагол).</span>
+          </div>
+          <div class="ref-algo-step">
+            <span class="ref-algo-num">2</span>
+            <div>Спросите себя:
+              <div class="ref-algo-qs">
+                <div class="ref-algo-q"><span class="ref-q-chip" style="background:#2B5BD7">Кто делает?</span> → <b>именительный</b> (без суффикса)</div>
+                <div class="ref-algo-q"><span class="ref-q-chip" style="background:#C0392B">Читать что? Видеть кого?</span> → <b>винительный</b></div>
+                <div class="ref-algo-q"><span class="ref-q-chip" style="background:#1E8449">Дать кому? Идти куда?</span> → <b>дательный</b></div>
+                <div class="ref-algo-q"><span class="ref-q-chip" style="background:#7B2FBE">Чья это вещь?</span> → <b>родительный</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ref-algo-example">
+          <div class="ref-algo-ex-title">Пример: «Я даю книгу другу»</div>
+          <div class="ref-algo-ex-row">
+            <span class="ref-ex-pill" style="background:rgba(43,91,215,.2);border-color:#2B5BD7">Я даю → <b>ben</b> <span style="color:#718096">(im.)</span></span>
+            <span class="ref-ex-pill" style="background:rgba(192,57,43,.2);border-color:#C0392B">книгу → <b>kitabı</b> <span style="color:#718096">(vin.)</span></span>
+            <span class="ref-ex-pill" style="background:rgba(30,132,73,.2);border-color:#1E8449">другу → <b>arkadaşa</b> <span style="color:#718096">(dat.)</span></span>
+          </div>
+          <div class="ref-algo-ex-result">Ben kita<b style="color:#f59e0b">bı</b> arkada<b style="color:#f59e0b">şa</b> veriyorum.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Шаблоны -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">📋 Готовые шаблоны</div>
+      <div class="ref-insight-body">
+        <div class="ref-tpl-list">
+          <div class="ref-tpl">
+            <div class="ref-tpl-head"><span class="rmt-badge" style="background:#7B2FBE">Родительный</span> — чья вещь?</div>
+            <div class="ref-tpl-formula"><span class="ref-formula-chip">X-in Y-i</span> → «Y X-а»</div>
+            <div class="ref-tpl-ex"><i>ev<b>in</b> kapısı</i> — «дверь дома»</div>
+          </div>
+          <div class="ref-tpl">
+            <div class="ref-tpl-head"><span class="rmt-badge" style="background:#1E8449">Дательный</span> — направление</div>
+            <div class="ref-tpl-formula"><span class="ref-formula-chip">X-e/a gidiyorum</span> → «иду в X»</div>
+            <div class="ref-tpl-ex"><i>okul<b>a</b> gidiyorum</i> — «иду в школу»</div>
+          </div>
+          <div class="ref-tpl">
+            <div class="ref-tpl-head"><span class="rmt-badge" style="background:#C0392B">Винительный</span> — определённый объект</div>
+            <div class="ref-tpl-formula"><span class="ref-formula-chip">X-i görmek</span> → «видеть X»</div>
+            <div class="ref-tpl-ex"><i>Ahmet'<b>i</b> gördüm</i> — «я видел Ахмета»</div>
+          </div>
+        </div>
+        <div class="ref-insight-tip">Если объект неопределённый (какая-то книга вообще) — суффикса нет: <i>kitap görüyorum</i> — «вижу книгу (какую-то)».</div>
+      </div>
+    </div>
+
+    <!-- Слух -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">👂 Как привыкнуть на слух</div>
+      <div class="ref-insight-body">
+        Ловите суффиксы в речи:
+        <div class="ref-ear-list">
+          <div class="ref-ear-row">
+            <span class="ref-ear-chip" style="background:rgba(192,57,43,.2);color:#fc8181;border-color:#C0392B">‑ı/‑i/‑u/‑ü</span>
+            <span>→ «кого/что именно» — <b>винительный</b></span>
+          </div>
+          <div class="ref-ear-row">
+            <span class="ref-ear-chip" style="background:rgba(30,132,73,.2);color:#68d391;border-color:#1E8449">‑a/‑e/‑ya/‑ye</span>
+            <span>→ «кому/куда» — <b>дательный</b></span>
+          </div>
+          <div class="ref-ear-row">
+            <span class="ref-ear-chip" style="background:rgba(123,47,190,.2);color:#d6bcfa;border-color:#7B2FBE">‑ın/‑in/‑un/‑ün</span>
+            <span>→ «кого/чья» — <b>родительный</b></span>
+          </div>
+          <div class="ref-ear-row">
+            <span class="ref-ear-chip" style="background:rgba(183,119,13,.2);color:#f6ad55;border-color:#B7770D">‑da/‑de/‑ta/‑te</span>
+            <span>→ «где» — <b>местный</b></span>
+          </div>
+          <div class="ref-ear-row">
+            <span class="ref-ear-chip" style="background:rgba(26,122,138,.2);color:#81e6d9;border-color:#1A7A8A">‑dan/‑den</span>
+            <span>→ «откуда» — <b>исходный</b></span>
+          </div>
+        </div>
+        <div class="ref-insight-tip">Последовательность <b>‑ın/‑in…‑ı/‑i</b> — всегда «чья-то вещь»: <i>arkadaşımın araba<b>sı</b></i> — «машина моего друга».</div>
+      </div>
+    </div>
+
+    <!-- Числа -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">🔢 Числа</div>
+      <div class="ref-insight-body">
+        <table class="ref-min-table">
+          <tr><td colspan="2" style="color:#888;font-size:11px;padding-bottom:4px">Единицы и десятки</td></tr>
+          <tr><td>1 — <b>bir</b></td><td>10 — <b>on</b></td></tr>
+          <tr><td>2 — <b>iki</b></td><td>20 — <b>yirmi</b></td></tr>
+          <tr><td>3 — <b>üç</b></td><td>30 — <b>otuz</b></td></tr>
+          <tr><td>4 — <b>dört</b></td><td>40 — <b>kırk</b></td></tr>
+          <tr><td>5 — <b>beş</b></td><td>50 — <b>elli</b></td></tr>
+          <tr><td>6 — <b>altı</b></td><td>60 — <b>altmış</b></td></tr>
+          <tr><td>7 — <b>yedi</b></td><td>70 — <b>yetmiş</b></td></tr>
+          <tr><td>8 — <b>sekiz</b></td><td>80 — <b>seksen</b></td></tr>
+          <tr><td>9 — <b>dokuz</b></td><td>90 — <b>doksan</b></td></tr>
+          <tr><td colspan="2">100 — <b>yüz</b> &nbsp;|&nbsp; 1000 — <b>bin</b> &nbsp;|&nbsp; 1 000 000 — <b>milyon</b></td></tr>
+        </table>
+        <div class="ref-insight-tip" style="margin-top:8px">
+          Порядковые: +<b>-ıncı/inci/uncu/üncü</b> &nbsp;→ &nbsp;<i>birinci, ikinci, üçüncü, dördüncü, beşinci…</i><br>
+          Дробные: <b>buçuk</b> (половина) &nbsp;→ &nbsp;<i>iki buçuk</i> = 2½<br>
+          Примерно: <b>yaklaşık</b> &nbsp;→ &nbsp;<i>yaklaşık elli lira</i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Указательные местоимения -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">👉 Указательные местоимения</div>
+      <div class="ref-insight-body">
+        <table class="ref-min-table">
+          <thead><tr><th>Форма</th><th>Значение</th><th>Мн. число</th></tr></thead>
+          <tr>
+            <td><span class="rmt-badge" style="background:#2B5BD7">bu</span></td>
+            <td>это (рядом)</td>
+            <td><b>bunlar</b></td>
+          </tr>
+          <tr>
+            <td><span class="rmt-badge" style="background:#1E8449">şu</span></td>
+            <td>то (недалеко)</td>
+            <td><b>şunlar</b></td>
+          </tr>
+          <tr>
+            <td><span class="rmt-badge" style="background:#B7770D">o</span></td>
+            <td>тот (далеко) / он/она</td>
+            <td><b>onlar</b></td>
+          </tr>
+        </table>
+        <div class="ref-insight-tip" style="margin-top:8px">
+          С суффиксами падежа: <br>
+          <b>bu</b> → <b>bunu</b> (вин.) &nbsp;|&nbsp; <b>buna</b> (дат.) &nbsp;|&nbsp; <b>bunda</b> (мест.) &nbsp;|&nbsp; <b>bundan</b> (исх.)<br>
+          <b>Правило:</b> если рядом стоит существительное — падеж ставится на него, <i>bu</i> остаётся без суффикса.<br>
+          <span style="color:#fc8181">✗</span> <i>bunu ürünü</i> &nbsp;|&nbsp; <span style="color:#68d391">✓</span> <i>bu ürünü</i> (вин.) &nbsp;|&nbsp; <span style="color:#68d391">✓</span> <i>bunu</i> (вин., без сущ.)
+        </div>
+      </div>
+    </div>
+
+    <!-- Личные местоимения -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">🙋 Личные местоимения</div>
+      <div class="ref-insight-body">
+        <table class="ref-min-table">
+          <thead><tr><th>Лицо</th><th>Им.</th><th style="color:#C0392B">Вин.</th><th style="color:#1E8449">Дат.</th></tr></thead>
+          <tr><td>Я</td><td><b>ben</b></td><td style="color:#C0392B"><b>beni</b></td><td style="color:#1E8449"><b>bana</b></td></tr>
+          <tr><td>Ты</td><td><b>sen</b></td><td style="color:#C0392B"><b>seni</b></td><td style="color:#1E8449"><b>sana</b></td></tr>
+          <tr><td>Он/она</td><td><b>o</b></td><td style="color:#C0392B"><b>onu</b></td><td style="color:#1E8449"><b>ona</b></td></tr>
+          <tr><td>Мы</td><td><b>biz</b></td><td style="color:#C0392B"><b>bizi</b></td><td style="color:#1E8449"><b>bize</b></td></tr>
+          <tr><td>Вы</td><td><b>siz</b></td><td style="color:#C0392B"><b>sizi</b></td><td style="color:#1E8449"><b>size</b></td></tr>
+          <tr><td>Они</td><td><b>onlar</b></td><td style="color:#C0392B"><b>onları</b></td><td style="color:#1E8449"><b>onlara</b></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Вопрос mı/mi -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">❓ Вопросительные частицы mı / mi / mu / mü</div>
+      <div class="ref-insight-body">
+
+        <div class="ref-insight-tip" style="margin-bottom:10px;border-left-color:#63b3ed;background:rgba(99,179,237,.08);color:#bee3f8">
+          В русском уточняющий вопрос («да/нет?») строится <b>интонацией</b>.<br>
+          В турецком — частицей <b>mı/mi/mu/mü</b>, которая пишется отдельно и подчиняется гармонии гласных.
+        </div>
+
+        <table class="ref-min-table">
+          <thead><tr><th>Гласные слова</th><th>Частица</th><th>Пример</th></tr></thead>
+          <tr><td>Мягкие: <b style="color:#fc8181">e, i</b></td><td><b>mi</b></td><td><i>Bu senin <b>mi</b>? — Это твоё?</i></td></tr>
+          <tr><td>Мягкие: <b style="color:#fc8181">ö, ü</b></td><td><b>mü</b></td><td><i>Ev güzel <b>mü</b>?</i></td></tr>
+          <tr><td>Твёрдые: <b style="color:#f6ad55">a, ı</b></td><td><b>mı</b></td><td><i>Anne avukat <b>mı</b>?</i></td></tr>
+          <tr><td>Твёрдые: <b style="color:#f6ad55">o, u</b></td><td><b>mu</b></td><td><i>Doktor burada <b>mu</b>?</i></td></tr>
+        </table>
+
+        <div style="margin-top:12px;font-size:13px;color:#cbd5e0">
+          <b>Прямые вопросы</b> — через вопросительные слова (kim, ne, nerede…):<br>
+          <div style="margin:4px 0 8px 8px;color:#a0aec0">
+            Bu <b>kim</b>? — Кто это? &nbsp;|&nbsp; Bu <b>kimin</b>? — Это чьё?<br>
+            Bu Lena <b>mı</b>? — Это Лена? &nbsp;|&nbsp; Bu senin <b>mi</b>? — Это твоё?
+          </div>
+          <b>Выбор из двух</b> — оба варианта с частицей, разделяются <b>yoksa / veya</b>:<br>
+          <div style="margin:4px 0 0 8px;color:#a0aec0">
+            Bu senin <b>mi</b> yoksa benim <b>mi</b>? — Это твоё или моё?
+          </div>
+        </div>
+
+        <div class="ref-insight-tip" style="margin-top:10px">
+          <b>Evet</b> + повтор: <i>Anne avukat mı? — Evet, avukat.</i><br>
+          <b>Hayır, değil</b>: <i>Hayır, avukat değil.</i> (değil = не является)
+        </div>
+      </div>
+    </div>
+
+    <!-- bu/bunu/buna в контексте -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">🛒 bu / bunu / buna — в магазине</div>
+      <div class="ref-insight-body">
+        <div class="ref-tpl-list">
+          <div class="ref-tpl">
+            <div class="ref-tpl-head">Взять <b>это</b> (без сущ.)</div>
+            <div class="ref-tpl-ex"><i><b>Bunu</b> alabilir miyim?</i> — Можно взять это?</div>
+          </div>
+          <div class="ref-tpl">
+            <div class="ref-tpl-head">Взять <b>этот</b> товар/лекарство</div>
+            <div class="ref-tpl-ex"><i>Bu ürün<b>ü</b> alabilir miyim?</i> / <i>Bu ilac<b>ı</b> alabilir miyim?</i></div>
+          </div>
+          <div class="ref-tpl">
+            <div class="ref-tpl-head">Посмотреть <b>это</b> (без сущ.)</div>
+            <div class="ref-tpl-ex"><i><b>Buna</b> bakabilir miyim?</i> — Можно посмотреть это?</div>
+          </div>
+          <div class="ref-tpl">
+            <div class="ref-tpl-head">Посмотреть <b>этот</b> товар</div>
+            <div class="ref-tpl-ex"><i>Bu ürün<b>e</b> bakabilir miyim?</i></div>
+          </div>
+        </div>
+        <div class="ref-insight-tip">
+          Разбор <b>alabilir miyim</b>: al + <span style="color:#f6ad55">a</span>bil + ir + <span style="color:#f6ad55">mi</span> + y + im<br>
+          <i>al</i> = брать &nbsp;|&nbsp; <i>-abil-</i> = мочь &nbsp;|&nbsp; <i>-ir</i> = настоящее &nbsp;|&nbsp; <i>mi</i> = вопрос &nbsp;|&nbsp; <i>-yim</i> = я
+        </div>
+      </div>
+    </div>
+
+    <!-- Глухие/звонкие + чередование согласных -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">🔉 Чередование согласных (оглушение)</div>
+      <div class="ref-insight-body">
+        <div style="display:flex;gap:16px;margin-bottom:10px">
+          <div>Глухие: <b style="color:#fc8181">ç f h k p s ş t</b></div>
+          <div>Звонкие: <b>b c d g ğ j l m n r v y z</b></div>
+        </div>
+        <table class="ref-min-table" style="margin-bottom:10px">
+          <thead><tr><th>Глухая</th><th>→</th><th>Звонкая</th></tr></thead>
+          <tr><td><b style="color:#fc8181">k</b></td><td>→</td><td><b>g, ğ</b></td></tr>
+          <tr><td><b style="color:#fc8181">p</b></td><td>→</td><td><b>b</b></td></tr>
+          <tr><td><b style="color:#fc8181">ç</b></td><td>→</td><td><b>c</b></td></tr>
+          <tr><td><b style="color:#fc8181">t</b></td><td>→</td><td><b>d</b></td></tr>
+        </table>
+        <div class="ref-insight-tip" style="border-left-color:#fc8181;background:rgba(252,129,129,.08);color:#feb2b2;margin-bottom:10px">
+          Меняются <b>только перед гласными</b> и не во всех словах.<br>
+          Существует группа слов-исключений, в которых они меняются.
+        </div>
+        <table class="ref-min-table">
+          <thead><tr><th>Основа</th><th>Пример</th><th>Что происходит</th></tr></thead>
+          <tr><td>kita<b style="color:#fc8181">p</b> — книга</td><td>kita<b style="color:#68d391">b</b>ım</td><td>моя книга (<b>p→b</b>)</td></tr>
+          <tr><td>çocu<b style="color:#fc8181">k</b> — ребёнок</td><td>çocuğ<b style="color:#68d391">u</b>m</td><td>мой ребёнок (<b>k→ğ</b>)</td></tr>
+          <tr><td>çiçe<b style="color:#fc8181">k</b> — цветок</td><td>çiçeğ<b style="color:#68d391">i</b>m</td><td>мой цветок (<b>k→ğ</b>)</td></tr>
+          <tr><td>bor<b style="color:#fc8181">ç</b> — долг</td><td>bor<b style="color:#68d391">c</b>um</td><td>мой долг (<b>ç→c</b>)</td></tr>
+          <tr><td>ren<b style="color:#fc8181">k</b> — цвет (искл.)</td><td>ren<b style="color:#68d391">g</b>i</td><td>его цвет (<b>k→g</b>, исключение)</td></tr>
+          <tr><td>ta<b style="color:#fc8181">t</b> — вкус</td><td>yemek ta<b style="color:#68d391">d</b>ı</td><td>вкус блюда (<b>t→d</b>)</td></tr>
+        </table>
+        <div class="ref-insight-tip" style="margin-top:8px">
+          <b>kita<span style="color:#fc8181">p</span></b> — книга &nbsp;→&nbsp; kita<b style="color:#68d391">b</b>ım (p→b перед -ım), kita<b style="color:#68d391">b</b>a (дат.), kita<b style="color:#68d391">b</b>ın (род.)<br>
+          Но: kita<b style="color:#fc8181">p</b>lar (мн. ч.) — перед согласной не меняется.
+        </div>
+      </div>
+    </div>
+
+    <!-- var / yok -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">✅ var и yok — есть / нет</div>
+      <div class="ref-insight-body">
+        <div class="ref-insight-tip" style="border-left-color:#68d391;background:rgba(104,211,145,.08);color:#9ae6b4;margin-bottom:10px">
+          <b>var</b> используется только в 2 случаях:<br>
+          1. Когда говорим о том, что <b>имеем</b>.<br>
+          2. Когда говорим о том, <b>сколько</b> имеем.<br>
+          Когда описываем объект (цвет, модель…) — <b>var можно опустить</b>.
+        </div>
+        <table class="ref-min-table">
+          <thead><tr><th>Случай</th><th>Вопрос</th><th>Ответ</th></tr></thead>
+          <tr>
+            <td>Есть ли?</td>
+            <td><i>Senin araba<b>n</b> var mı?</i></td>
+            <td><i>Evet, benim araba<b>m</b> var.</i></td>
+          </tr>
+          <tr>
+            <td>Сколько?</td>
+            <td><i>Senin <b>kaç</b> araba<b>n</b> var?</i></td>
+            <td><i>Benim <b>2</b> araba<b>m</b> var.</i></td>
+          </tr>
+          <tr>
+            <td>Описание</td>
+            <td><i>Senin araban <b>siyah</b> mı?</i></td>
+            <td><i>Evet, benim arabam siyah.</i> (var опущен)</td>
+          </tr>
+        </table>
+        <div class="ref-insight-tip" style="margin-top:8px">
+          <b>ad, soyad, yaş</b> — нельзя спрашивать «есть ли?», так как имя/фамилия/возраст есть у всех.<br>
+          Спрашивайте: Senin yaş<b>ın</b> <b>kaç</b>? (kaç стоит <b>после</b> для возраста)
+        </div>
+      </div>
+    </div>
+
+    <!-- kaç -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">🔢 kaç — сколько?</div>
+      <div class="ref-insight-body">
+        <div class="ref-insight-tip" style="margin-bottom:10px">
+          <b>kaç</b> стоит <b>перед существительным</b> (как числительное), кроме возраста.<br>
+          Когда есть числительное — сущ. во множественном не используем.
+        </div>
+        <table class="ref-min-table">
+          <thead><tr><th>Вопрос</th><th>Ответ</th><th>Перевод</th></tr></thead>
+          <tr>
+            <td><i>Senin <b>kaç</b> çocuklar<b>ın</b> var?</i></td>
+            <td><i>Benim <b>2</b> çocuğ<b>um</b> var.</i></td>
+            <td>Сколько детей? — 2 ребёнка.</td>
+          </tr>
+          <tr>
+            <td><i>Senin <b>kaç</b> kart<b>ın</b> var?</i></td>
+            <td><i>Benim <b>3</b> kart<b>ım</b> var.</i></td>
+            <td>Сколько карт? — 3 карты.</td>
+          </tr>
+          <tr>
+            <td><i>Senin yaş<b>ın</b> kaç?</i></td>
+            <td><i>Benim yaş<b>ım</b> 27.</i></td>
+            <td>Сколько лет? — 27.</td>
+          </tr>
+          <tr>
+            <td><i>Senin <b>kaç</b> para<b>n</b> var?</i></td>
+            <td><i>Benim 4 bin ruble<b>m</b> var.</i></td>
+            <td>Сколько денег? — 4 тыс. руб.</td>
+          </tr>
+        </table>
+        <div class="ref-insight-tip" style="margin-top:8px">
+          При ответе слово «деньги» (<i>para</i>) выпадает — остаются количество + валюта с притяж. аффиксом.<br>
+          1 <b>mal</b> = 1 товар &nbsp;|&nbsp; 10 <b>mal</b> = 10 товаров &nbsp;|&nbsp; 5 <b>erkek</b> = 5 мужчин &nbsp;— сущ. без мн. ч.
+        </div>
+      </div>
+    </div>
+
+    <!-- mi позиция -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">📌 Позиция частицы mı/mi в предложении</div>
+      <div class="ref-insight-body">
+        <div class="ref-insight-tip" style="margin-bottom:10px">
+          Частица стоит <b>после уточняемого слова</b>. Носители языка могут ставить в конец — оба варианта верны.
+        </div>
+        <table class="ref-min-table">
+          <thead><tr><th>Что уточняем?</th><th>Форма 1 (грамматически верна)</th><th>Форма 2 (разговорная)</th></tr></thead>
+          <tr>
+            <td>Есть ли квартира?</td>
+            <td><i>Senin <b>2 mi</b> dairen var?</i></td>
+            <td><i>Senin 2 dairen <b>var mı</b>?</i></td>
+          </tr>
+          <tr>
+            <td>2 ли квартиры?</td>
+            <td><i>Senin <b>2 mi</b> dairen var?</i></td>
+            <td><i>Senin 2 dairen var <b>mı</b>?</i></td>
+          </tr>
+        </table>
+        <div class="ref-insight-tip" style="margin-top:8px">
+          <i>Senin dairen <b>var mı</b>?</i> — У тебя <b>есть</b> квартира?<br>
+          <i>Evet, benim daire<b>m var</b>.</i> — Да, у меня <b>есть</b> квартира.<br>
+          <i>Senin <b>kaç</b> dairen var?</i> — <b>Сколько</b> у тебя квартир?<br>
+          <i>Benim <b>2</b> daire<b>m</b> var.</i> — У меня <b>2</b> квартиры.
+        </div>
+      </div>
+    </div>
+
+    <!-- Прилагательное перед/после сущ. -->
+    <div class="ref-insight">
+      <div class="ref-insight-title">🌏 Прилагательное: до сущ. или после?</div>
+      <div class="ref-insight-body">
+        <table class="ref-min-table">
+          <thead><tr><th>Турецкий</th><th>Русский</th><th>Роль</th></tr></thead>
+          <tr>
+            <td><i>bu <b>yeşil</b> kitap</i></td>
+            <td>эта <b>зелёная</b> книга</td>
+            <td>Дополнение (прил. <b>до</b> сущ.)</td>
+          </tr>
+          <tr>
+            <td><i>bu kitap <b>yeşil</b></i></td>
+            <td>эта книга <b>зелёная</b></td>
+            <td>Определение (прил. <b>после</b> сущ.)</td>
+          </tr>
+        </table>
+        <div class="ref-insight-tip" style="margin-top:8px">
+          В обоих языках эти роли совпадают — разница лишь в порядке слов.<br>
+          Турецкое прилагательное всегда стоит <b>до</b> существительного, не согласуется с ним.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══ БЛОК: ПРАВИЛО ПАДЕЖЕЙ (ILAÇ) ═══ -->
+    <div class="ref-section">
+      <div class="ref-title">💊 Падежи: к существительному или местоимению?</div>
+      <div class="ref-body">
+        <div class="ref-insight-tip" style="margin-bottom:10px">
+          Падежные окончания добавляются к <b>существительному</b>, если оно есть в предложении.<br>
+          Если существительного нет — окончание добавляется к <b>указательному местоимению</b> (bu, şu, o).<br>
+          <b>Нельзя</b> добавлять окончания одновременно и к местоимению, и к существительному!
+        </div>
+        <table class="ref-table">
+          <tr><th>Конструкция</th><th>alabilir miyim?<br><small>(могу купить?)</small></th><th>bakabilir miyim?<br><small>(могу посмотреть?)</small></th></tr>
+          <tr><td>только местоимение</td><td><b>bunu</b> alabilir miyim?</td><td><b>buna</b> bakabilir miyim?</td></tr>
+          <tr><td>+ существительное</td><td>bu ürün<b>ü</b> alabilir miyim?</td><td>bu ürün<b>e</b> bakabilir miyim?</td></tr>
+          <tr><td>+ существительное</td><td>bu ilac<b>ı</b> alabilir miyim?</td><td>bu ilac<b>a</b> bakabilir miyim?</td></tr>
+        </table>
+        <div class="ref-insight-tip" style="margin-top:10px">
+          <b>Разбор: al · a · bil · ir · mi · y · im?</b><br>
+          <table class="ref-table" style="margin-top:6px">
+            <tr><th>Часть</th><th>Значение</th></tr>
+            <tr><td><b>al</b></td><td>корень глагола almak (купить, взять)</td></tr>
+            <tr><td><b>a</b></td><td>промежуточная гласная</td></tr>
+            <tr><td><b>bil</b></td><td>корень bilmek (знать) → суффикс возможности</td></tr>
+            <tr><td><b>ir</b></td><td>окончание настоящего-будущего времени</td></tr>
+            <tr><td><b>mi</b></td><td>вопросительная частица</td></tr>
+            <tr><td><b>y</b></td><td>промежуточная согласная (между гласными)</td></tr>
+            <tr><td><b>im</b></td><td>1-е лицо (ben — я)</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ БЛОК: KAÇ VS NE KADAR ═══ -->
+    <div class="ref-section">
+      <div class="ref-title">🔢 kaç vs ne kadar — в чём разница?</div>
+      <div class="ref-body">
+        <table class="ref-table">
+          <tr><th></th><th>kaç</th><th>ne kadar</th></tr>
+          <tr><td><b>Когда</b></td><td>исчисляемые вещи (поштучно)</td><td>неисчисляемые / время / расстояние / деньги / объём / степень</td></tr>
+          <tr><td><b>Примеры</b></td><td>Kaç elma yedin?<br><small>Сколько яблок съел?</small><br>Kaç kişi geldi?<br><small>Сколько человек пришло?</small><br>Kaç kitap var?<br><small>Сколько книг есть?</small></td><td>Ne kadar su içtin?<br><small>Сколько воды выпил?</small><br>Ne kadar zaman kaldı?<br><small>Сколько времени осталось?</small><br>Ne kadar yedin?<br><small>Сколько ты поел?</small></td></tr>
+          <tr><td><b>Позиция</b></td><td>обычно перед существительным</td><td>с неисчисл. сущ. или как наречие меры/степени</td></tr>
+        </table>
+        <div class="ref-insight-tip" style="margin-top:8px">
+          Думай так: <b>kaç</b> = «сколько штук?» (можно посчитать),<br>
+          <b>ne kadar</b> = «сколько?» когда считать нельзя или говорим о степени.
+        </div>
+      </div>
+    </div>
+
+    <div style="height:8px"></div>
+  </div><!-- /ref -->
+
+  <!-- ═══════════════ SENTENCES ═══════════════ -->
+  <div id="page-sent" class="page">
+    <div class="page-title">Предложения</div>
+
+    <!-- Mode switch: Фразы / Диалоги -->
+    <div class="mode-switch">
+      <button class="mode-btn active" id="mode-phrases">Фразы</button>
+      <button class="mode-btn" id="mode-dialogs">Диалоги</button>
+    </div>
+
+    <!-- === PHRASES SECTION === -->
+    <div id="phrases-section">
+    <!-- Topic filter -->
+    <div class="cat-filter" id="sent-topic-filter"></div>
+
+    <!-- Level filter -->
+    <div class="sent-filter">
+      <button class="sent-lvl active" id="sent-lvl-all">Все</button>
+      <button class="sent-lvl" id="sent-lvl-1">Простые</button>
+      <button class="sent-lvl" id="sent-lvl-2">Средние</button>
+    </div>
+
+    <!-- Session stats -->
+    <div class="session-bar">
+      <div class="s-stat"><span class="s-num" id="ss-total">0</span><span class="s-lbl">вопросов</span></div>
+      <div class="s-stat"><span class="s-num c-ok" id="ss-right">0</span><span class="s-lbl">верно</span></div>
+      <div class="s-stat"><span class="s-num" id="ss-acc">—</span><span class="s-lbl">точность</span></div>
+    </div>
+
+    <!-- Question card -->
+    <div class="question-card" id="sent-card">
+      <div class="sent-ru-label">Фраза на русском:</div>
+      <div class="sent-ru" id="sent-ru"></div>
+      <div class="sent-open-block">
+        <div class="sent-open-title">Ответ на русском:</div>
+        <div class="sent-open-val" id="sent-ru-answer">—</div>
+      </div>
+      <div class="pronoun-row">
+        <button class="pronoun-btn" id="btn-sent-pronoun">🙋 Кто?</button>
+        <span class="pronoun-val" id="sent-pronoun" style="display:none"></span>
+      </div>
+      <button class="sent-hint-btn" id="btn-sent-show-tr-q">🇹🇷 Показать по-турецки</button>
+      <div class="sent-hint" id="sent-tr-wrap" style="display:none">
+        <div><b>Турецкий вариант:</b></div>
+        <div id="sent-tr-text" style="margin-top:6px;font-weight:800"></div>
+      </div>
+      <button class="sent-hint-btn" id="btn-sent-hint">💡 Показать подсказку</button>
+      <div class="sent-hint" id="sent-hint" style="display:none"></div>
+
+      <!-- Input -->
+      <div id="sent-input-area">
+        <input type="text" id="sent-answer" class="answer-input"
+          placeholder="Напишите по-турецки…"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-sent-check">Проверить</button>
+          <button class="btn btn-ghost" id="btn-sent-skip">Пропустить</button>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div id="sent-result-area" style="display:none">
+        <div class="res-top">
+          <span class="res-icon" id="sent-res-icon"></span>
+          <div>
+            <div class="res-verdict" id="sent-res-verdict"></div>
+            <div class="res-your" id="sent-res-your" style="display:none"></div>
+            <div class="res-correct" id="sent-res-correct"></div>
+          </div>
+        </div>
+        <div class="rule-box" id="sent-res-hint"></div>
+        <button class="btn btn-primary btn-full" id="btn-sent-next">Следующее →</button>
+      </div>
+    </div>
+    </div><!-- /phrases-section -->
+
+    <!-- === DIALOGS SECTION === -->
+    <div id="dialogs-section" style="display:none">
+      <!-- Dialog topic filter -->
+      <div class="cat-filter" id="dlg-topic-filter"></div>
+
+      <!-- Dialog session stats -->
+      <div class="session-bar">
+        <div class="s-stat"><span class="s-num" id="ds-total">0</span><span class="s-lbl">вопросов</span></div>
+        <div class="s-stat"><span class="s-num c-ok" id="ds-right">0</span><span class="s-lbl">верно</span></div>
+        <div class="s-stat"><span class="s-num" id="ds-acc">—</span><span class="s-lbl">точность</span></div>
+      </div>
+
+      <!-- Dialog card -->
+      <div class="question-card" id="dlg-card">
+        <div class="dlg-topic-badge" id="dlg-topic-badge"></div>
+        <div class="dlg-q-label">Вопрос на русском:</div>
+        <div class="dlg-question" id="dlg-question"></div>
+        <div class="sent-open-block">
+          <div class="sent-open-title">Ответ на русском:</div>
+          <div class="sent-open-val" id="dlg-answer-ru">—</div>
+        </div>
+        <button class="sent-hint-btn" id="btn-dlg-show-qtr">🇹🇷 Показать вопрос по-турецки</button>
+        <div class="sent-hint" id="dlg-question-tr-wrap" style="display:none">
+          <div><b>Вопрос (TR):</b></div>
+          <div id="dlg-question-tr" style="margin-top:6px;font-weight:800"></div>
+        </div>
+        <button class="sent-hint-btn" id="btn-dlg-show-atr">🇹🇷 Показать ответ по-турецки</button>
+        <div class="sent-hint" id="dlg-answer-tr-wrap" style="display:none">
+          <div><b>Ответ (TR):</b></div>
+          <div id="dlg-answer-tr" style="margin-top:6px;font-weight:800"></div>
+        </div>
+        <div class="pronoun-row">
+          <button class="pronoun-btn" id="btn-dlg-pronoun-q">🙋 Кто спрашивает?</button>
+          <span class="pronoun-val" id="dlg-pronoun-q" style="display:none"></span>
+        </div>
+        <div class="pronoun-row">
+          <button class="pronoun-btn" id="btn-dlg-pronoun-a">🙋 Кто отвечает?</button>
+          <span class="pronoun-val" id="dlg-pronoun-a" style="display:none"></span>
+        </div>
+        <button class="sent-hint-btn" id="btn-dlg-hint">💡 Показать подсказку</button>
+        <div class="sent-hint" id="dlg-hint" style="display:none"></div>
+
+        <!-- Input -->
+        <div id="dlg-input-area">
+          <input type="text" id="dlg-question-answer" class="answer-input"
+            placeholder="Напишите вопрос по-турецки…"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="text" id="dlg-answer" class="answer-input"
+            placeholder="Напишите ответ по-турецки…"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin-top:10px">
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btn-dlg-check">Проверить</button>
+            <button class="btn btn-ghost" id="btn-dlg-skip">Пропустить</button>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div id="dlg-result-area" style="display:none">
+          <div class="res-top">
+            <span class="res-icon" id="dlg-res-icon"></span>
+            <div>
+              <div class="res-verdict" id="dlg-res-verdict"></div>
+              <div class="res-your" id="dlg-res-your" style="display:none"></div>
+              <div class="res-correct" id="dlg-res-correct"></div>
+            </div>
+          </div>
+          <div class="rule-box" id="dlg-res-hint"></div>
+          <button class="btn btn-primary btn-full" id="btn-dlg-next">Следующий →</button>
+        </div>
+      </div>
+    </div><!-- /dialogs-section -->
+
+  </div><!-- /sent -->
+
+  <!-- ═══════════════ MY WORDS ═══════════════ -->
+  <div id="page-words" class="page">
+    <div class="page-title">Мои слова</div>
+
+    <div class="add-word-form">
+      <div class="add-word-row">
+        <input type="text" id="new-word-tr" class="add-input" placeholder="Турецкое слово (напр. araba)"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <input type="text" id="new-word-ru" class="add-input" placeholder="Перевод на русском (напр. машина)"
+          autocomplete="off" spellcheck="false">
+      </div>
+      <button class="btn btn-primary btn-full" id="btn-add-word">Добавить слово</button>
+      <div id="add-word-msg" class="add-word-msg"></div>
+    </div>
+
+    <div id="my-words-list" class="my-words-list"></div>
+  </div>
+
+  <!-- NAV BAR -->
+  <nav class="nav-bar">
+    <button class="nav-btn active" id="nav-trainer">
+      <span class="nav-icon">✏️</span>Тренажёр
+    </button>
+    <button class="nav-btn" id="nav-stats">
+      <span class="nav-icon">📊</span>Прогресс
+    </button>
+    <button class="nav-btn" id="nav-sent">
+      <span class="nav-icon">💬</span>Фразы
+    </button>
+    <button class="nav-btn" id="nav-words">
+      <span class="nav-icon">➕</span>Слова
+    </button>
+    <button class="nav-btn" id="nav-ref">
+      <span class="nav-icon">📖</span>Справка
+    </button>
+  </nav>
+
+</div><!-- /shell -->
+<script src="app.js"></script>
+</body>
+</html>
