@@ -945,7 +945,8 @@ input  { font: inherit; }
 }
 
 .flashcard-card { transform-style: preserve-3d; cursor: pointer; transition: transform 0.6s; }
-  transform: rotateY(180deg);
+.flashcard-card.flipped {
+    transform: rotateY(180deg);
 }
 
 .fc-front, .fc-back {
