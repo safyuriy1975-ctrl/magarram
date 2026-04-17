@@ -47,6 +47,13 @@ function showPage(pageId) {
   if (activeBtn) {
     activeBtn.setAttribute('aria-current', 'true');
   }
+
+    // Initialize page-specific functionality
+  if (pageId === 'page-flashcard') {
+    setTimeout(() => initFlashcard(), 100);
+  } else if (pageId === 'page-timer') {
+    setTimeout(() => initTimer(), 100);
+  }
 }
 
 // ─── VOWEL HARMONY ────────────────────────────────────────────────────────────
@@ -1856,4 +1863,154 @@ function checkAchievements() {
   
   const acc = s.total > 0 ? Math.round(s.right / s.total * 100) : 0;
   if (s.total >= 20 && acc >= 90) showToast('⭐ Точность 90%+!');
+}
+
+
+// ───────────────────────────────────────────────────────────────────────────────
+// FLASHCARD MODE
+// ───────────────────────────────────────────────────────────────────────────────
+
+let flashcardIndex = 0;
+let flashcardWords = [];
+let isFlipped = false;
+
+function initFlashcard() {
+  flashcardWords = WORDS.slice();
+  flashcardIndex = 0;
+  renderFlashcard();
+  
+  const flipBtn = document.getElementById('flip-btn');
+  const prevBtn = document.getElementById('prev-card');
+  const nextBtn = document.getElementById('next-card');
+  
+  if (flipBtn) flipBtn.onclick = () => flipCard();
+  if (prevBtn) prevBtn.onclick = () => changeCard(-1);
+  if (nextBtn) nextBtn.onclick = () => changeCard(1);
+}
+
+function renderFlashcard() {
+  if (flashcardWords.length === 0) return;
+  
+  const word = flashcardWords[flashcardIndex];
+  const cardFront = document.getElementById('card-front');
+  const cardBack = document.getElementById('card-back');
+  const cardNum = document.getElementById('card-number');
+  
+  if (cardFront) cardFront.textContent = word.tr;
+  if (cardBack) cardBack.textContent = word.ru;
+  if (cardNum) cardNum.textContent = `${flashcardIndex + 1} / ${flashcardWords.length}`;
+  
+  isFlipped = false;
+  const card = document.getElementById('flashcard');
+  if (card) card.classList.remove('flipped');
+}
+
+function flipCard() {
+  const card = document.getElementById('flashcard');
+  if (card) {
+    isFlipped = !isFlipped;
+    card.classList.toggle('flipped');
+  }
+}
+
+function changeCard(direction) {
+  flashcardIndex += direction;
+  if (flashcardIndex < 0) flashcardIndex = flashcardWords.length - 1;
+  if (flashcardIndex >= flashcardWords.length) flashcardIndex = 0;
+  renderFlashcard();
+}
+
+// ───────────────────────────────────────────────────────────────────────────────
+// TIMER MODE
+// ───────────────────────────────────────────────────────────────────────────────
+
+let timerInterval = null;
+let timeLeft = 60;
+let timerScore = 0;
+let timerCurrentWord = null;
+
+function initTimer() {
+  timeLeft = 60;
+  timerScore = 0;
+  renderTimer();
+  
+  const startBtn = document.getElementById('timer-start');
+  if (startBtn) startBtn.onclick = () => startTimer();
+}
+
+function startTimer() {
+  if (timerInterval) return;
+  
+  timeLeft = 60;
+  timerScore = 0;
+  nextTimerQuestion();
+  
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    
+    if (timeLeft <= 0) {
+      endTimer();
+    }
+  }, 1000);
+}
+
+function nextTimerQuestion() {
+  timerCurrentWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+  const questionEl = document.getElementById('timer-question');
+  if (questionEl) questionEl.textContent = timerCurrentWord.ru;
+  
+  const answerInput = document.getElementById('timer-answer');
+  if (answerInput) {
+    answerInput.value = '';
+    answerInput.focus();
+    answerInput.onkeypress = (e) => {
+      if (e.key === 'Enter') checkTimerAnswer();
+    };
+  }
+}
+
+function checkTimerAnswer() {
+  const answerInput = document.getElementById('timer-answer');
+  if (!answerInput || !timerCurrentWord) return;
+  
+  const userAnswer = answerInput.value.trim().toLowerCase();
+  const correctAnswer = timerCurrentWord.tr.toLowerCase();
+  
+  if (userAnswer === correctAnswer) {
+    timerScore++;
+    showToast('✓ Правильно!');
+    nextTimerQuestion();
+  } else {
+    showToast(`✗ Неверно. Правильно: ${timerCurrentWord.tr}`);
+  }
+  
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const timeEl = document.getElementById('timer-time');
+  const scoreEl = document.getElementById('timer-score');
+  
+  if (timeEl) timeEl.textContent = timeLeft;
+  if (scoreEl) scoreEl.textContent = timerScore;
+}
+
+function renderTimer() {
+  updateTimerDisplay();
+  const questionEl = document.getElementById('timer-question');
+  if (questionEl) questionEl.textContent = 'Нажмите "Старт"';
+  
+  const answerInput = document.getElementById('timer-answer');
+  if (answerInput) answerInput.value = '';
+}
+
+function endTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  
+  showToast(`⏱ Время вышло! Набрано очков: ${timerScore}`);
+  renderTimer();
 }
