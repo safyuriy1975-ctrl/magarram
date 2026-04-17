@@ -37,6 +37,9 @@ function showPage(pageId) {
   // Show selected page
   const targetPage = document.getElementById(pageId);
   if (targetPage) targetPage.style.display = 'block';
+  // Render flashcard/timer when navigating to them
+  if (pageId === 'page-flashcard') { loadFavorites(); if (!flashcardState.current) flashcardState.current = pickFlashcard(); renderFlashcard(); }
+  if (pageId === 'page-timer') { if (!timerState.currentQuestion) timerState.currentQuestion = pickQuestion(null); renderTimer(); }
   
   // Update nav buttons
   document.querySelectorAll('.nav-btn').forEach(btn => {
