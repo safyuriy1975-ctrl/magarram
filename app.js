@@ -1532,8 +1532,8 @@ function checkDlgAnswer() {
   const d = dlgState.current;
   const userQ = (($('dlg-question-answer') && $('dlg-question-answer').value) || '').trim();
   const userA = $('dlg-answer').value.trim();
-  const okQ = normalizeTR(userQ) === normalizeTR(d.q_tr);
-  const okA = normalizeTR(userA) === normalizeTR(d.a_tr);
+  const okQ = normalizeTr(userQ) === normalizeTr(d.q_tr);
+  const okA = normalizeTr(userA) === normalizeTr(d.a_tr);
   const ok = okQ && okA;
 
   dlgState.session.total++;
@@ -1724,7 +1724,7 @@ function renderFlashcard() {
   const card = $('flashcard');
   const isFav = flashcardState.favorites.has(w.w);
   
-  card.className = 'flashcard-card' + (flashcardState.flipped ? ' flipped' : '');
+  card.onclick = flipCard; card.className = 'flashcard-card' + (flashcardState.flipped ? ' flipped' : '');
   card.innerHTML = `
     <div class="fc-front">
       <div class="fc-header">
