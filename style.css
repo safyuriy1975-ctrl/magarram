@@ -1227,6 +1227,6 @@ input  { font: inherit; }
 
 .timer-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #667eea; } /* ─── Timer & Flashcard Page IDs ─── */ #timer-time { font-size: 48px; font-weight: 900; color: #0d9db0; display: block; text-align: center; letter-spacing: -.02em; } #timer-score { font-size: 20px; font-weight: 700; color: #9a9ab0; display: block; text-align: center; margin-top: -8px; } #timer-word-ru { font-size: 22px; font-weight: 800; color: #e8e8f0; display: block; text-align: center; margin-top: 12px; } #timer-word-tr { font-size: 16px; color: #7a7a9a; display: block; text-align: center; } #timer-case-name { font-size: 13px; background: #1a1a30; border: 1px solid #2a2a45; color: #0d9db0; padding: 4px 12px; border-radius: 999px; display: inline-block; margin: 8px auto; } #page-timer .page-title { display: flex; align-items: center; gap: 8px; } .timer-display-row { display: flex; flex-direction: column; align-items: center; background: #1a1a30; border-radius: 16px; border: 1px solid #2a2a45; padding: 20px; margin-bottom: 12px; } /* remove duplicate brace */ .timer-input:focus { outline: none;
   box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
 }
