@@ -827,68 +827,7 @@
   <div id="page-sent" class="page">
     <div class="page-title">Предложения</div>
 
-    <!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- FLASHCARD PAGE -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<div id="page-flashcard" class="page">
-  <div style="padding: 12px; display: flex; flex-direction: column; gap: 12px;">
     
-    <!-- Session bar -->
-    <div class="session-bar">
-      <div class="s-stat"><span class="s-num" id="fc-total">0</span><span class="s-lbl">попыток</span></div>
-      <div class="s-stat"><span class="s-num c-ok" id="fc-right">0</span><span class="s-lbl">верно</span></div>
-      <div class="s-stat"><span class="s-num c-warn" id="fc-acc">—</span><span class="s-lbl">точность</span></div>
-    </div>
-    
-    <!-- Flashcard -->
-    <div id="flashcard" class="flashcard-card" onclick="flipCard()"></div>
-    
-    <!-- Buttons -->
-    <div class="btn-row">
-      <button class="btn btn-ghost" onclick="markWrong()">❌ Не знаю</button>
-      <button class="btn btn-primary" onclick="markCorrect()">✅ Знаю</button>
-    </div>
-    
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- TIMER PAGE -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<div id="page-timer" class="page">
-  <div style="padding: 12px; display: flex; flex-direction: column; gap: 12px;">
-    
-    <!-- Timer bar -->
-    <div class="session-bar">
-      <div class="s-stat"><span class="s-num c-err" id="timer-time">60s</span><span class="s-lbl">осталось</span></div>
-      <div class="s-stat"><span class="s-num c-ok" id="timer-score">0/0</span><span class="s-lbl">счёт</span></div>
-    </div>
-    
-    <!-- Question card -->
-    <div class="question-card">
-      <div class="word-display">
-        <span class="word-tr" id="timer-word-tr">kedi</span>
-        <span class="word-ru" id="timer-word-ru">«кошка»</span>
-      </div>
-      <div class="task-prompt">Поставьте в <b id="timer-case-name">винительный</b> падеж</div>
-      
-      <!-- Input -->
-      <div id="timer-input-area" class="input-area">
-        <input type="text" id="timer-answer" class="answer-input" placeholder="Введите форму...">
-      </div>
-      
-      <!-- Result -->
-      <div id="timer-result-area" style="display: none;" class="result-area res-ok">
-        <div class="res-verdict ok">Время вышло!</div>
-        <div class="res-correct" id="timer-final-score">0/0</div>
-        <button class="btn btn-primary btn-full" onclick="startTimer()">🔄 Начать заново</button>
-      </div>
-    </div>
-    
-    <button class="btn btn-primary btn-full" onclick="startTimer()" id="timer-start-btn">▶️ Старт</button>
-  </div>
-</div>
-
     <!-- Mode switch: Фразы / Диалоги -->
     <div class="mode-switch">
       <button class="mode-btn active" id="mode-phrases">Фразы</button>
