@@ -932,6 +932,7 @@ input  { font: inherit; }
   max-width: 500px;
   height: 300px;
   perspective: 1000px;
+    position: relative;
   margin: 20px 0;
 }
 
