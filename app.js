@@ -28,8 +28,7 @@ function highlightSentenceAffixes(text){
 
 function showPage(pageId) {
   // Hide all pages
-  const pages = ['page-trainer', 'page-stats', 'page-sent', 'page-flashcard', 'page-timer', 'page-words', 'page-ref'];
-  pages.forEach(id => {
+  const pages = ['page-trainer', 'page-stats', 'page-sent', 'page-words', 'page-ref'];  pages.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -38,8 +37,6 @@ function showPage(pageId) {
   const targetPage = document.getElementById(pageId);
   if (targetPage) targetPage.style.display = 'block';
   // Render flashcard/timer when navigating to them
-  if (pageId === 'page-flashcard') { loadFavorites(); if (!flashcardState.current) flashcardState.current = pickFlashcard(); renderFlashcard(); }
-  if (pageId === 'page-timer') { if (!timerState.currentQuestion) timerState.currentQuestion = pickQuestion(null); renderTimer(); }
   
   // Update nav buttons
   document.querySelectorAll('.nav-btn').forEach(btn => {
